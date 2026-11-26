@@ -54,9 +54,9 @@ const RADENG_V31_SAMPLE = {
   ],
   grammar: [
     {
-      topic: 'Superselective Vessel Catheterization Phrasing',
-      formula: 'A microcatheter was advanced superselectively into + [feeding artery]',
-      explanation: 'Diễn đạt thao tác luồn vi ống thông siêu chọn lọc vào nhánh nuôi khối u.',
+      topic: 'Past Simple Passive with Adverbs',
+      formula: 'S + was / were + V3/ed + adverb of manner (+ prepositional phrase)',
+      explanation: 'Dùng trạng từ chỉ cách thức (superselectively, slowly, carefully) bổ nghĩa trực tiếp cho động từ ở thể bị động quá khứ đơn.',
       sourceSentence:
         'A 2.4F microcatheter was advanced superselectively into the right hepatic feeding branch.',
       quickPractice: [
@@ -64,7 +64,7 @@ const RADENG_V31_SAMPLE = {
           question: 'Drug-eluting beads were _____ slowly under fluoroscopic guidance.',
           options: ['infused', 'infusing', 'infuse'],
           correctAnswer: 'infused',
-          explanation: 'Dùng thể bị động quá khứ đơn trong tường trình thủ thuật.',
+          explanation: 'Dùng quá khứ phân từ sau "were" trong cấu trúc bị động quá khứ đơn.',
         },
       ],
     },

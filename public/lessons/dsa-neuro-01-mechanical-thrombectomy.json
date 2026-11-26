@@ -84,79 +84,79 @@
   "grammar": [
     {
       "id": "gp_dsa_1",
-      "topic": "Procedural Past Passive in DSA Reports (Câu bị động quá khứ trong tường trình can thiệp)",
-      "formula": "S (catheter / microcatheter / device / vessel) + was/were + V3/ed (+ under roadmap guidance / via + access)",
-      "explanationVi": "Trong tường trình thủ thuật DSA và bài báo Điện quang can thiệp, luôn ưu tiên câu bị động thì quá khứ đơn lấy dụng cụ hoặc mạch máu làm chủ ngữ để đảm bảo tính khách quan, chuẩn mực lâm sàng.",
+      "topic": "Past Simple Passive",
+      "formula": "S + was / were + V3/ed (+ by / via / under + phrase)",
+      "explanationVi": "Thể bị động thì quá khứ đơn dùng để mô tả các bước đã thực hiện một cách khách quan, đưa đối tượng hoặc dụng cụ làm chủ ngữ — rất tự nhiên trong báo cáo CĐHA và tường trình DSA.",
       "sourceSentence": {
         "en": "A 6F long sheath was navigated into the distal cervical internal carotid artery under roadmap guidance.",
         "vi": "Một ống dẫn dài 6F được luồn vào đoạn xa động mạch cảnh trong vùng cổ dưới hướng dẫn bản đồ mạch."
       },
       "quickExercises": [
         {
-          "id": "dg1",
+          "id": "gp1_q1",
           "type": "mcq",
           "prompt": "Complete reperfusion (mTICI 3) _____ after the first pass of the combined technique.",
           "options": ["achieved", "was achieved", "were achieved", "has achieving"],
           "answer": "was achieved",
-          "explanationVi": "Chủ ngữ số ít 'Complete reperfusion' chịu tác động của thủ thuật nên dùng 'was achieved'."
+          "explanationVi": "Chủ ngữ số ít 'Complete reperfusion' chịu tác động của hành động nên dùng bị động 'was achieved'."
         },
         {
-          "id": "dg2",
+          "id": "gp1_q2",
           "type": "fill",
           "prompt": "The microcatheter was carefully _____ (advance) across the occlusive M1 thrombus.",
           "answer": "advanced",
-          "explanationVi": "Dạng quá khứ phân từ (V3/ed) của 'advance' trong câu bị động là 'advanced'."
+          "explanationVi": "Quá khứ phân từ (V3/ed) của 'advance' trong câu bị động là 'advanced'."
         },
         {
-          "id": "dg3",
+          "id": "gp1_q3",
           "type": "mcq",
-          "prompt": "Select the most idiomatic procedural report sentence:",
+          "prompt": "Choose the sentence with accurate passive structure:",
           "options": [
             "We were deployed the stent retriever across the clot.",
             "The stent retriever was deployed across the occluded M1 segment.",
             "The stent retriever deployed across the occluded M1 segment by the operator."
           ],
           "answer": "The stent retriever was deployed across the occluded M1 segment.",
-          "explanationVi": "Đưa dụng cụ ('The stent retriever') làm chủ ngữ bị động giúp câu chuẩn văn phong báo cáo y khoa."
+          "explanationVi": "Đưa đối tượng chịu tác động ('The stent retriever') làm chủ ngữ với cấu trúc 'was + V3/ed'."
         }
       ]
     },
     {
       "id": "gp_dsa_2",
-      "topic": "Participle Clauses for Sequential Steps (Mệnh đề phân từ mô tả trình tự thủ thuật)",
-      "formula": "Following + Noun / V-ing, S + was/were + V3/ed  |  Confirming + Noun, S + V",
-      "explanationVi": "Dùng 'Following + danh từ hóa' ở đầu câu giúp kết nối mạch lạc các bước liên tiếp trong phòng DSA mà không lặp lại liên tục từ 'Then'.",
+      "topic": "Participle Clauses",
+      "formula": "Following + Noun / V-ing, S + V  |  S + V, V-ing (result / accompanying action)",
+      "explanationVi": "Mệnh đề phân từ giúp nối hai hành động xảy ra nối tiếp hoặc diễn đạt kết quả trực tiếp một cách ngắn gọn, tránh lặp lại liên tục liên từ 'and then'.",
       "sourceSentence": {
         "en": "Following microcatheter contrast injection confirming distal lumen position, the stent retriever was unsheathed.",
         "vi": "Sau khi bơm thuốc cản quang qua vi ống thông xác nhận vị trí trong lòng mạch xa, stent kéo được bung ra."
       },
       "quickExercises": [
         {
-          "id": "dg4",
+          "id": "gp2_q1",
           "type": "mcq",
           "prompt": "_____ five minutes of clot integration, the stent retriever was withdrawn under continuous aspiration.",
           "options": ["Followed", "Following", "Follow", "To follow"],
           "answer": "Following",
-          "explanationVi": "'Following + cụm danh từ' mang nghĩa 'sau khi...' rất phổ biến trong báo cáo can thiệp."
+          "explanationVi": "'Following + cụm danh từ' mang nghĩa 'sau khi...' giúp câu súc tích và mạch lạc."
         },
         {
-          "id": "dg5",
+          "id": "gp2_q2",
           "type": "fill",
           "prompt": "Control angiography was performed, _____ (confirm) brisk antegrade flow in the MCA territory.",
           "answer": "confirming",
-          "explanationVi": "Hiện tại phân từ 'confirming' diễn tả kết quả trực tiếp của động tác chụp mạch kiểm tra."
+          "explanationVi": "Hiện tại phân từ 'confirming' diễn tả kết quả trực tiếp của mệnh đề chính."
         },
         {
-          "id": "dg6",
+          "id": "gp2_q3",
           "type": "mcq",
-          "prompt": "Which sentence concisely describes hemostasis after sheath removal?",
+          "prompt": "Choose the most concise and grammatically accurate sentence:",
           "options": [
             "Following sheath removal, hemostasis was achieved using a vascular closure device.",
             "Followed sheath removal, hemostasis achieved using a closure device.",
             "Follow sheath removal, we achieved hemostasis."
           ],
           "answer": "Following sheath removal, hemostasis was achieved using a vascular closure device.",
-          "explanationVi": "Kết hợp chuẩn xác 'Following + N' và câu bị động quá khứ đơn 'hemostasis was achieved'."
+          "explanationVi": "Kết hợp chuẩn xác 'Following + danh từ' với thể bị động quá khứ đơn ở mệnh đề chính."
         }
       ]
     }

@@ -88,10 +88,17 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
     showToast(`Kết quả Reading: ${correct}/${totalQ} câu đúng (${stars}★ · +25 XP)`);
   };
 
+  const jumpToEvidenceParagraph = (paraId?: string) => {
+    if (!paraId) return;
+    setHighlightPara(paraId);
+    const el = document.getElementById(`reading-para-${lesson.id}-${paraId}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
-    <div className="reading-split">
-      {/* Left Pane: Bilingual Passage & Glossary */}
-      <section className="card stack-md">
+    <div className="reading-split-ielts">
+      {/* Left Pane: Independent-Scroll Bilingual Passage & Glossary */}
+      <section className="card reading-pane-scroll stack-md" aria-label="Bài đọc hiểu">
         <div className="flex-between flex-wrap">
           <div>
             <span className="badge badge-accent">Reading Passage</span>
@@ -188,6 +195,7 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
             return (
               <div
                 key={p.id}
+                id={`reading-para-${lesson.id}-${p.id}`}
                 className={`stack-sm ${isEvidence ? 'evidence-highlight' : ''}`}
                 style={{ padding: '6px 8px' }}
               >
@@ -246,8 +254,8 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         )}
       </section>
 
-      {/* Right Pane: 4 Question Types */}
-      <section className="card stack-md">
+      {/* Right Pane: Independent-Scroll 4 Question Types */}
+      <section className="card reading-pane-scroll stack-md" aria-label="Câu hỏi đọc hiểu">
         <div className="flex-between flex-wrap">
           <h3 style={{ margin: 0, fontSize: '1.08rem' }}>Bài tập Đọc hiểu (4 dạng · {totalQ} câu)</h3>
           <div className="flex-row">
@@ -305,7 +313,7 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                     {q.evidenceParagraph && (
                       <button
                         className="btn btn-sm btn-soft"
-                        onClick={() => setHighlightPara(q.evidenceParagraph || null)}
+                        onClick={() => jumpToEvidenceParagraph(q.evidenceParagraph)}
                       >
                         Xem bằng chứng ({q.evidenceParagraph})
                       </button>
@@ -355,7 +363,7 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                     {q.evidenceParagraph && (
                       <button
                         className="btn btn-sm btn-soft"
-                        onClick={() => setHighlightPara(q.evidenceParagraph || null)}
+                        onClick={() => jumpToEvidenceParagraph(q.evidenceParagraph)}
                       >
                         Bằng chứng ({q.evidenceParagraph})
                       </button>

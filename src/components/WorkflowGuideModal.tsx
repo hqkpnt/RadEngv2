@@ -34,7 +34,9 @@ QUY TẮC BẮT BUỘC:
 1. Chính xác tuyệt đối về thuật ngữ y khoa CĐHA & DSA (không bịa số liệu hoặc phác đồ ngoài tài liệu).
 2. Toàn bộ trường dịch nghĩa tiếng Việt (*Vi) phải chuẩn thuật ngữ chuyên khoa Việt Nam.
 3. Vocabulary: 6–10 thuật ngữ cốt lõi nhất của chương, bắt buộc có ipa, wordRoot (phân tích gốc Hy Lạp/Latinh), termKey (snake_case không dấu), noteVi lâm sàng, và ví dụ song ngữ Anh–Việt sát thực hành đọc phim/can thiệp.
-4. Grammar: 1–2 điểm ngữ pháp tường trình CĐHA/DSA tiêu biểu trong chương, mỗi điểm có formula, sourceSentence (Anh–Việt) và ĐÚNG 3 câu quickExercises (trộn mcq + fill).
+4. Grammar: 1–2 điểm ngữ pháp tiêu biểu trong chương.
+   - ĐẶT TÊN điểm ngữ pháp ("topic") PHẢI ngắn gọn, chuẩn tên ngữ pháp tiếng Anh (2–5 từ, ví dụ: "Passive Modal Verbs", "Past Simple Passive", "Participle Clauses", "Reduced Relative Clauses", "Concession Clauses") — KHÔNG nhồi ngữ cảnh dài dòng vào tên điểm ngữ pháp (tránh kiểu "Passive Modal Verbs for Clinical Recommendations & Protocols").
+   - Đưa ngữ cảnh CĐHA/DSA hoặc học thuật một cách tự nhiên vào phần explanationVi, sourceSentence và 3 câu quickExercises (trộn mcq + fill, mỗi câu có id riêng như "gp1_q1", "gp1_q2", "gp1_q3").
 5. Listening: Viết kịch bản thuyết minh/bàn giao ca bệnh hấp dẫn kiểu phim tài liệu khoa học (4–6 câu ngắn gọn có nhịp ngắt rõ ràng), kèm notesTemplate (3 ý), gapFill (2–3 câu) và mcq (2–3 câu).
 6. Reading: 2–3 đoạn tổng hợp kiến thức trọng tâm từ chương (có bản dịch tiếng Việt từng đoạn), glossary (3–5 thuật ngữ khó) và ĐỦ 4 dạng câu hỏi: mcq, tfng (TRUE/FALSE/NOT GIVEN), matching, completion (có evidenceParagraph).
 7. Writing: ĐÚNG 8 câu paraphraseTasks (trộn translation Việt→Anh và paraphrase y khoa có targetKeywords) + 1 essayTask (viết tóm tắt hình ảnh/tường trình ca lâm sàng >=150 từ) kèm 3 bài mẫu đối chiếu band7, band8, band9.
@@ -70,14 +72,14 @@ MẪU CẤU TRÚC JSON BẮT BUỘC:
   "grammar": [
     {
       "id": "gp_1",
-      "topic": "Tên điểm ngữ pháp",
-      "formula": "Công thức cấu trúc",
-      "explanationVi": "Giải thích cách dùng trong báo cáo CĐHA/DSA",
+      "topic": "Passive Modal Verbs",
+      "formula": "S + modal (should / must / may / can) + be + V3/ed",
+      "explanationVi": "Dùng thể bị động với động từ khuyết thiếu để nêu khuyến cáo, chỉ định hoặc nguyên tắc thực hành một cách khách quan.",
       "sourceSentence": { "en": "...", "vi": "..." },
       "quickExercises": [
-        { "id": "g1", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "A", "explanationVi": "..." },
-        { "id": "g2", "type": "fill", "prompt": "...", "answer": "...", "explanationVi": "..." },
-        { "id": "g3", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "B", "explanationVi": "..." }
+        { "id": "gp1_q1", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "A", "explanationVi": "..." },
+        { "id": "gp1_q2", "type": "fill", "prompt": "...", "answer": "...", "explanationVi": "..." },
+        { "id": "gp1_q3", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "B", "explanationVi": "..." }
       ]
     }
   ],

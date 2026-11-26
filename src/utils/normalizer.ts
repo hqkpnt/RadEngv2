@@ -103,6 +103,34 @@ function normalizeVocabulary(rawVocab: unknown): VocabItem[] {
     .filter((v): v is VocabItem => v !== null);
 }
 
+/**
+ * Keeps grammar point names concise and true to English grammar terminology
+ * (e.g. "Passive Modal Verbs for Clinical Recommendations & Protocols" -> "Passive Modal Verbs"),
+ * removing verbose domain-padding tails and redundant parenthetical translations.
+ */
+function normalizeGrammarTopic(raw: string, fallback: string): string {
+  let clean = raw.trim();
+  if (!clean) return fallback;
+
+  // Strip trailing parenthetical Vietnamese explanation when an English core title precedes it
+  const withoutParen = clean.replace(/\s*\([^)]{6,}\)\s*$/, '').trim();
+  if (withoutParen.length >= 6) clean = withoutParen;
+
+  // Strip verbose context tails like "for Clinical Recommendations...", "in DSA Reports..."
+  const trimmedTail = clean
+    .replace(
+      /\s+(?:for|in|when|used\s+in|used\s+for)\s+(?:clinical|procedural|radiolog\w*|dsa|medical|neuro\w*|imaging|endovascular|diagnostic|interventional|reporting|sequential|academic|case)\b.*$/i,
+      ''
+    )
+    .trim();
+
+  if (trimmedTail.length >= 6) clean = trimmedTail;
+
+  // Remove trailing punctuation left over
+  clean = clean.replace(/[:\-–—,;]+$/, '').trim();
+  return clean || fallback;
+}
+
 function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
   const list = Array.isArray(rawGrammar)
     ? rawGrammar
@@ -112,11 +140,21 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
         : [rawGrammar]
       : [];
 
+  const seenPointIds = new Set<string>();
+
   return list
     .map((entry, idx): GrammarPoint | null => {
       const o = asObj(entry);
-      const topic = asStr(o.topic || o.title || o.name);
-      if (!topic && !o.formula && !o.quickExercises && !o.quickPractice) return null;
+      const rawTopic = asStr(o.topic || o.title || o.name);
+      if (!rawTopic && !o.formula && !o.quickExercises && !o.quickPractice) return null;
+
+      let pointId = asStr(o.id) || `gp_${idx + 1}`;
+      if (seenPointIds.has(pointId)) {
+        pointId = `${pointId}_${idx + 1}`;
+      }
+      seenPointIds.add(pointId);
+
+      const topic = normalizeGrammarTopic(rawTopic, `Grammar Point ${idx + 1}`);
 
       const srcRaw = o.sourceSentence || o.sourceExample;
       let sourceEn = '';
@@ -133,6 +171,7 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
       const rawExercises = asArr(
         o.quickExercises || o.quickPractice || o.exercises || o.practice
       );
+      const seenExIds = new Set<string>();
       const quickExercises: GrammarExercise[] = rawExercises
         .map((ex, eIdx): GrammarExercise | null => {
           const e = asObj(ex);
@@ -142,8 +181,13 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
           const type: 'mcq' | 'fill' =
             asStr(e.type).toLowerCase() === 'fill' || options.length === 0 ? 'fill' : 'mcq';
           const answer = resolveAnswer(e.answer ?? e.correctAnswer ?? e.correctIndex, options);
+          let exId = asStr(e.id) || `${pointId}_q${eIdx + 1}`;
+          if (seenExIds.has(exId)) {
+            exId = `${pointId}_${exId}_${eIdx + 1}`;
+          }
+          seenExIds.add(exId);
           return {
-            id: asStr(e.id) || `g_${idx + 1}_${eIdx + 1}`,
+            id: exId,
             type,
             prompt,
             options: options.length > 0 ? options : undefined,
@@ -154,8 +198,8 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
         .filter((x): x is GrammarExercise => x !== null);
 
       return {
-        id: asStr(o.id) || `gp_${idx + 1}`,
-        topic: topic || `Điểm ngữ pháp ${idx + 1}`,
+        id: pointId,
+        topic,
         formula: asStr(o.formula || o.pattern || o.structure),
         explanationVi: asStr(o.explanationVi || o.explanation || o.description),
         sourceSentence: { en: sourceEn, vi: sourceVi },

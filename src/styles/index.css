@@ -557,6 +557,43 @@ a {
   align-items: start;
 }
 
+/* IELTS-style Independent 2-Column Scroll for Reading (Desktop / Landscape) */
+.reading-split-ielts {
+  display: grid;
+  grid-template-columns: minmax(0, 1.14fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: stretch;
+  height: calc(100vh - 150px);
+  min-height: 540px;
+  max-height: 920px;
+}
+
+.zen-active .reading-split-ielts {
+  height: calc(100vh - 96px);
+}
+
+.reading-pane-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+.reading-pane-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.reading-pane-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.reading-pane-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+
 .flex-row {
   display: flex;
   align-items: center;
@@ -1120,8 +1157,17 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .reading-split {
+  .reading-split,
+  .reading-split-ielts {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .reading-pane-scroll {
+    height: auto;
+    overflow-y: visible;
   }
 
   .grid-4 {
