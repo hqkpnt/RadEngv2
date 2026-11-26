@@ -1,0 +1,473 @@
+{
+  "schemaVersion": 2,
+  "id": "dsa-neuro-01-mechanical-thrombectomy",
+  "track": "rad_dsa",
+  "builtIn": true,
+  "meta": {
+    "title": "Mechanical Thrombectomy in Acute Ischemic Stroke",
+    "titleVi": "Lấy huyết khối cơ học trong đột quỵ thiếu máu não cấp",
+    "level": "C1",
+    "subspecialty": "neuro_dsa",
+    "sourceBook": "Handbook of Neuroendovascular Intervention (Ch. 4)",
+    "tags": ["Stroke", "LVO", "Stent-Retriever", "mTICI", "DSA"],
+    "estimatedMinutes": 45,
+    "createdAt": "2026-11-25"
+  },
+  "vocabulary": [
+    {
+      "termKey": "mechanical_thrombectomy",
+      "term": "mechanical thrombectomy",
+      "ipa": "/məˈkæn.ɪ.kəl θrɒmˈbek.tə.mi/",
+      "pos": "noun phrase",
+      "wordRoot": "thromb- (cục máu đông) + -ectomy (thủ thuật lấy bỏ)",
+      "meaningVi": "Lấy huyết khối cơ học (qua đường nội mạch DSA)",
+      "noteVi": "Điều trị chuẩn vàng cho đột quỵ tắc mạch máu lớn (LVO) tuần hoàn trước.",
+      "exampleEn": "Mechanical thrombectomy significantly improves 90-day functional independence in patients with proximal LVO.",
+      "exampleVi": "Lấy huyết khối cơ học cải thiện rõ rệt khả năng độc lập chức năng sau 90 ngày ở bệnh nhân tắc mạch lớn đoạn gần."
+    },
+    {
+      "termKey": "penumbra",
+      "term": "ischemic penumbra",
+      "ipa": "/ɪˈskiː.mɪk pəˈnʌm.brə/",
+      "pos": "noun phrase",
+      "wordRoot": "isch- (kìm giữ) + haema (máu); paene (gần như) + umbra (bóng tối)",
+      "meaningVi": "Vùng tranh tối tranh sáng (nhu mô não thiếu máu còn khả năng cứu vãn)",
+      "noteVi": "Đánh giá trên CT tưới máu (CTP) qua bất tương xứng CBF < 30% và Tmax > 6s.",
+      "exampleEn": "Preserving the ischemic penumbra relies on rapid recanalization before infarct core expansion.",
+      "exampleVi": "Bảo tồn vùng tranh tối tranh sáng phụ thuộc vào tái thông nhanh trước khi lõi nhồi máu lan rộng."
+    },
+    {
+      "termKey": "recanalization",
+      "term": "recanalization",
+      "ipa": "/ˌriː.kæn.ə.laɪˈzeɪ.ʃən/",
+      "pos": "noun",
+      "wordRoot": "re- (lại) + canal (lòng ống/lòng mạch) + -ization (quá trình)",
+      "meaningVi": "Sự tái thông lòng mạch máu bị tắc",
+      "noteVi": "Đánh giá mức độ tái tưới máu trên phim DSA theo thang điểm mTICI (0 đến 3).",
+      "exampleEn": "Successful recanalization defined as mTICI 2b–3 was achieved after a single combined pass.",
+      "exampleVi": "Tái thông thành công được định nghĩa là mTICI 2b–3 đã đạt được sau một lần kéo kết hợp duy nhất."
+    },
+    {
+      "termKey": "distal_embolization",
+      "term": "distal embolization",
+      "ipa": "/ˈdɪs.təl ˌem.bə.laɪˈzeɪ.ʃən/",
+      "pos": "noun phrase",
+      "wordRoot": "distal (đầu xa) + embolos (vật chêm/nút tắc)",
+      "meaningVi": "Thuyên tắc mảnh huyết khối trôi về nhánh mạch xa (hoặc vùng mạch mới)",
+      "noteVi": "Biến chứng cần hạn chế bằng bóng chặn đầu gần (BGC) hoặc hút liên tục qua ống thông trung gian.",
+      "exampleEn": "Continuous proximal aspiration during stent retrieval lowers the incidence of distal embolization.",
+      "exampleVi": "Hút liên tục đầu gần trong quá trình kéo stent giúp giảm tỷ lệ thuyên tắc nhánh xa."
+    },
+    {
+      "termKey": "vessel_tortuosity",
+      "term": "vessel tortuosity",
+      "ipa": "/ˈves.əl ˌtɔː.tʃuˈɒs.ə.ti/",
+      "pos": "noun phrase",
+      "wordRoot": "tortuosus (xoắn vặn, ngoằn ngoèo)",
+      "meaningVi": "Độ ngoằn ngoèo, xoắn vặn của mạch máu (cung ĐMC, ĐM cảnh)",
+      "noteVi": "Yếu tố giải phẫu quan trọng ảnh hưởng đến lựa chọn đường vào (đùi hay quay) và hệ thống ống thông đồng trục.",
+      "exampleEn": "Severe cervical carotid tortuosity prompted a switch to transradial access with a triaxial support system.",
+      "exampleVi": "Tình trạng xoắn vặn nặng động mạch cảnh đoạn cổ thúc đẩy chuyển sang đường vào động mạch quay với hệ thống hỗ trợ ba trục."
+    },
+    {
+      "termKey": "collateral_circulation",
+      "term": "collateral circulation",
+      "ipa": "/kəˈlæt.ər.əl ˌsɜː.kjʊˈleɪ.ʃən/",
+      "pos": "noun phrase",
+      "wordRoot": "col- (cùng) + latus (bên cạnh) -> tuần hoàn bàng hệ",
+      "meaningVi": "Tuần hoàn bàng hệ (màng mềm / đa giác Willis)",
+      "noteVi": "Tuần hoàn bàng hệ tốt giúp làm chậm tốc độ tiến triển lõi nhồi máu và mở rộng cửa sổ can thiệp.",
+      "exampleEn": "Robust leptomeningeal collateral circulation sustained the penumbra well beyond the 6-hour window.",
+      "exampleVi": "Tuần hoàn bàng hệ màng mềm tốt đã duy trì vùng tranh tối tranh sáng vượt xa cửa sổ 6 giờ."
+    }
+  ],
+  "grammar": [
+    {
+      "id": "gp_dsa_1",
+      "topic": "Procedural Past Passive in DSA Reports (Câu bị động quá khứ trong tường trình can thiệp)",
+      "formula": "S (catheter / microcatheter / device / vessel) + was/were + V3/ed (+ under roadmap guidance / via + access)",
+      "explanationVi": "Trong tường trình thủ thuật DSA và bài báo Điện quang can thiệp, luôn ưu tiên câu bị động thì quá khứ đơn lấy dụng cụ hoặc mạch máu làm chủ ngữ để đảm bảo tính khách quan, chuẩn mực lâm sàng.",
+      "sourceSentence": {
+        "en": "A 6F long sheath was navigated into the distal cervical internal carotid artery under roadmap guidance.",
+        "vi": "Một ống dẫn dài 6F được luồn vào đoạn xa động mạch cảnh trong vùng cổ dưới hướng dẫn bản đồ mạch."
+      },
+      "quickExercises": [
+        {
+          "id": "dg1",
+          "type": "mcq",
+          "prompt": "Complete reperfusion (mTICI 3) _____ after the first pass of the combined technique.",
+          "options": ["achieved", "was achieved", "were achieved", "has achieving"],
+          "answer": "was achieved",
+          "explanationVi": "Chủ ngữ số ít 'Complete reperfusion' chịu tác động của thủ thuật nên dùng 'was achieved'."
+        },
+        {
+          "id": "dg2",
+          "type": "fill",
+          "prompt": "The microcatheter was carefully _____ (advance) across the occlusive M1 thrombus.",
+          "answer": "advanced",
+          "explanationVi": "Dạng quá khứ phân từ (V3/ed) của 'advance' trong câu bị động là 'advanced'."
+        },
+        {
+          "id": "dg3",
+          "type": "mcq",
+          "prompt": "Select the most idiomatic procedural report sentence:",
+          "options": [
+            "We were deployed the stent retriever across the clot.",
+            "The stent retriever was deployed across the occluded M1 segment.",
+            "The stent retriever deployed across the occluded M1 segment by the operator."
+          ],
+          "answer": "The stent retriever was deployed across the occluded M1 segment.",
+          "explanationVi": "Đưa dụng cụ ('The stent retriever') làm chủ ngữ bị động giúp câu chuẩn văn phong báo cáo y khoa."
+        }
+      ]
+    },
+    {
+      "id": "gp_dsa_2",
+      "topic": "Participle Clauses for Sequential Steps (Mệnh đề phân từ mô tả trình tự thủ thuật)",
+      "formula": "Following + Noun / V-ing, S + was/were + V3/ed  |  Confirming + Noun, S + V",
+      "explanationVi": "Dùng 'Following + danh từ hóa' ở đầu câu giúp kết nối mạch lạc các bước liên tiếp trong phòng DSA mà không lặp lại liên tục từ 'Then'.",
+      "sourceSentence": {
+        "en": "Following microcatheter contrast injection confirming distal lumen position, the stent retriever was unsheathed.",
+        "vi": "Sau khi bơm thuốc cản quang qua vi ống thông xác nhận vị trí trong lòng mạch xa, stent kéo được bung ra."
+      },
+      "quickExercises": [
+        {
+          "id": "dg4",
+          "type": "mcq",
+          "prompt": "_____ five minutes of clot integration, the stent retriever was withdrawn under continuous aspiration.",
+          "options": ["Followed", "Following", "Follow", "To follow"],
+          "answer": "Following",
+          "explanationVi": "'Following + cụm danh từ' mang nghĩa 'sau khi...' rất phổ biến trong báo cáo can thiệp."
+        },
+        {
+          "id": "dg5",
+          "type": "fill",
+          "prompt": "Control angiography was performed, _____ (confirm) brisk antegrade flow in the MCA territory.",
+          "answer": "confirming",
+          "explanationVi": "Hiện tại phân từ 'confirming' diễn tả kết quả trực tiếp của động tác chụp mạch kiểm tra."
+        },
+        {
+          "id": "dg6",
+          "type": "mcq",
+          "prompt": "Which sentence concisely describes hemostasis after sheath removal?",
+          "options": [
+            "Following sheath removal, hemostasis was achieved using a vascular closure device.",
+            "Followed sheath removal, hemostasis achieved using a closure device.",
+            "Follow sheath removal, we achieved hemostasis."
+          ],
+          "answer": "Following sheath removal, hemostasis was achieved using a vascular closure device.",
+          "explanationVi": "Kết hợp chuẩn xác 'Following + N' và câu bị động quá khứ đơn 'hemostasis was achieved'."
+        }
+      ]
+    }
+  ],
+  "listening": {
+    "title": "Neuro-Cath Lab Briefing: Acute Left M1 Occlusion",
+    "notesTemplate": [
+      "Imaging baseline: NCCT ASPECTS 9, hyperdense left M1 sign, CTA proximal M1 cutoff.",
+      "Access plan: 8F balloon guide catheter via right common femoral artery.",
+      "Primary strategy: Combined contact aspiration + stent-retriever (Solumbra/SAVE) for first-pass mTICI 3."
+    ],
+    "transcriptSentences": [
+      {
+        "id": "dls1",
+        "en": "Baseline non-contrast CT excluded intracranial hemorrhage and showed an ASPECTS score of nine.",
+        "vi": "CT không tiêm thuốc nền đã loại trừ xuất huyết nội sọ và cho điểm ASPECTS bằng 9."
+      },
+      {
+        "id": "dls2",
+        "en": "CT angiography confirmed a proximal left M1 occlusion with robust leptomeningeal collaterals.",
+        "vi": "Chụp CTA xác nhận tắc đoạn gần M1 trái kèm tuần hoàn bàng hệ màng mềm phong phú."
+      },
+      {
+        "id": "dls3",
+        "en": "We will deploy a stent retriever through a distal aspiration catheter for first-pass recanalization.",
+        "vi": "Chúng ta sẽ bung stent kéo qua ống thông hút đầu xa nhằm đạt tái thông ngay lần đầu."
+      },
+      {
+        "id": "dls4",
+        "en": "Final control angiography demonstrated complete mTICI three reperfusion without distal embolization.",
+        "vi": "Chụp mạch kiểm tra cuối cùng cho thấy tái tưới máu hoàn toàn mTICI 3 và không có thuyên tắc nhánh xa."
+      }
+    ],
+    "gapFill": [
+      {
+        "id": "dlg1",
+        "sentence": "Baseline non-contrast CT excluded intracranial _____ and showed an ASPECTS score of nine.",
+        "answer": "hemorrhage",
+        "hint": "xuất huyết"
+      },
+      {
+        "id": "dlg2",
+        "sentence": "CT angiography confirmed a proximal left M1 _____ with robust leptomeningeal collaterals.",
+        "answer": "occlusion",
+        "hint": "tắc mạch"
+      }
+    ],
+    "mcq": [
+      {
+        "id": "dlm1",
+        "question": "What was the baseline ASPECTS score on non-contrast CT?",
+        "options": ["6", "7", "9", "10"],
+        "answer": "9",
+        "explanationVi": "Câu 1 nêu rõ 'showed an ASPECTS score of nine'."
+      },
+      {
+        "id": "dlm2",
+        "question": "What reperfusion grade was achieved on final control angiography?",
+        "options": ["mTICI 1", "mTICI 2a", "mTICI 2b", "mTICI 3"],
+        "answer": "mTICI 3",
+        "explanationVi": "Câu 4 xác nhận 'complete mTICI three reperfusion without distal embolization'."
+      }
+    ]
+  },
+  "reading": {
+    "title": "Imaging Selection & First-Pass Effect in Endovascular Stroke Therapy",
+    "paragraphs": [
+      {
+        "id": "p1",
+        "en": "Rapid neuroimaging is the cornerstone of patient selection for mechanical thrombectomy. Non-contrast CT first excludes acute intracranial hemorrhage and estimates early ischemic changes via the ASPECTS score, while multiphase CTA pinpoints the exact occlusion site and grades leptomeningeal collateral circulation.",
+        "vi": "Chẩn đoán hình ảnh thần kinh nhanh chóng là nền tảng của việc chọn lựa bệnh nhân lấy huyết khối cơ học. CT không tiêm thuốc trước hết loại trừ xuất huyết nội sọ cấp và ước lượng biến đổi thiếu máu sớm qua điểm ASPECTS, trong khi CTA đa pha định vị chính xác vị trí tắc và phân độ tuần hoàn bàng hệ màng mềm."
+      },
+      {
+        "id": "p2",
+        "en": "In patients presenting beyond six hours from last known well, CT perfusion differentiates the irreversibly damaged ischemic core from the salvageable ischemic penumbra. A favorable target mismatch profile identifies individuals who still derive substantial benefit from endovascular recanalization up to twenty-four hours.",
+        "vi": "Ở bệnh nhân nhập viện sau 6 giờ kể từ lần cuối còn bình thường, CT tưới máu phân biệt lõi nhồi máu tổn thương không hồi phục với vùng tranh tối tranh sáng còn khả năng cứu vãn. Hồ sơ bất tương xứng mục tiêu thuận lợi giúp nhận diện những người vẫn hưởng lợi đáng kể từ tái thông nội mạch lên tới 24 giờ."
+      },
+      {
+        "id": "p3",
+        "en": "During the DSA procedure itself, neurointerventionalists strive for the first-pass effect—defined as achieving complete or near-complete reperfusion (mTICI 2c–3) on the initial retrieval attempt. Combining a large-bore aspiration catheter with a stent retriever and proximal flow arrest reduces clot fragmentation and minimizes distal embolization into unaffected territories.",
+        "vi": "Ngay trong thủ thuật DSA, các bác sĩ điện quang can thiệp thần kinh hướng đến hiệu ứng lần đầu (first-pass effect) — được định nghĩa là đạt tái tưới máu hoàn toàn hoặc gần hoàn toàn (mTICI 2c–3) ngay ở lần kéo đầu tiên. Kết hợp ống thông hút lòng rộng với stent kéo và chặn dòng đầu gần giúp giảm vỡ vụn huyết khối và hạn chế tối đa thuyên tắc xa vào các vùng mạch lành."
+      }
+    ],
+    "glossary": [
+      {
+        "termKey": "aspects_score",
+        "term": "ASPECTS score",
+        "ipa": "/ˈæs.pekts skɔːr/",
+        "wordRoot": "Alberta Stroke Program Early CT Score (thang 10 điểm vùng MCA)",
+        "meaningVi": "Thang điểm đánh giá tổn thương thiếu máu sớm vùng ĐM não giữa trên CT"
+      },
+      {
+        "termKey": "target_mismatch",
+        "term": "target mismatch",
+        "ipa": "/ˈtɑː.ɡɪt ˈmɪs.mætʃ/",
+        "wordRoot": "mismatch (bất tương xứng thể tích lõi nhồi máu và vùng thiếu máu)",
+        "meaningVi": "Bất tương xứng mục tiêu (lõi nhỏ, vùng penumbra lớn đủ chỉ định can thiệp cửa sổ muộn)"
+      },
+      {
+        "termKey": "first_pass_effect",
+        "term": "first-pass effect",
+        "ipa": "/ˌfɜːst ˈpɑːs ɪˈfekt/",
+        "wordRoot": "first pass (lần kéo dụng cụ đầu tiên)",
+        "meaningVi": "Hiệu ứng tái thông hoàn toàn (mTICI 2c–3) ngay lần kéo huyết khối đầu tiên"
+      }
+    ],
+    "questions": {
+      "mcq": [
+        {
+          "id": "dr_mcq1",
+          "question": "What is the primary role of CT perfusion in patients arriving after 6 hours?",
+          "options": [
+            "Measuring femoral artery diameter",
+            "Distinguishing irreversible infarct core from salvageable penumbra",
+            "Replacing DSA during stent deployment",
+            "Calculating radiation dose during fluoroscopy"
+          ],
+          "answer": "Distinguishing irreversible infarct core from salvageable penumbra",
+          "evidenceParagraph": "p2",
+          "explanationVi": "Đoạn 2 chỉ rõ CTP phân biệt 'irreversibly damaged ischemic core' và 'salvageable ischemic penumbra'."
+        }
+      ],
+      "tfng": [
+        {
+          "id": "dr_tf1",
+          "statement": "Non-contrast CT is performed before CTA to rule out acute intracranial hemorrhage.",
+          "answer": "TRUE",
+          "evidenceParagraph": "p1",
+          "explanationVi": "Đoạn 1 xác nhận 'Non-contrast CT first excludes acute intracranial hemorrhage'."
+        },
+        {
+          "id": "dr_tf2",
+          "statement": "The first-pass effect requires at least three separate device passes to be confirmed.",
+          "answer": "FALSE",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Đoạn 3 định nghĩa first-pass effect là đạt mTICI 2c–3 ngay ở 'initial retrieval attempt'."
+        }
+      ],
+      "matching": [
+        {
+          "id": "dr_m1",
+          "prompt": "Match 'multiphase CTA' to its diagnostic contribution",
+          "options": [
+            "Excludes hemorrhage without contrast",
+            "Pinpoints occlusion site and grades collaterals",
+            "Closes the femoral puncture site"
+          ],
+          "answer": "Pinpoints occlusion site and grades collaterals",
+          "evidenceParagraph": "p1",
+          "explanationVi": "Đoạn 1 nêu multiphase CTA định vị vị trí tắc và đánh giá tuần hoàn bàng hệ."
+        }
+      ],
+      "completion": [
+        {
+          "id": "dr_c1",
+          "prompt": "Combining proximal flow arrest with aspiration helps minimize distal _____ into unaffected territories.",
+          "answer": "embolization",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Đoạn 3 nêu rõ cụm từ 'minimizes distal embolization'."
+        }
+      ]
+    }
+  },
+  "writing": {
+    "paraphraseTasks": [
+      {
+        "id": "dw1",
+        "type": "translation",
+        "prompt": "CT không tiêm thuốc đã loại trừ xuất huyết nội sọ cấp.",
+        "targetKeywords": ["non-contrast CT", "excluded", "intracranial hemorrhage"],
+        "modelAnswer": "Baseline non-contrast CT excluded acute intracranial hemorrhage.",
+        "noteVi": "Câu mở đầu kinh điển trong báo cáo CĐHA đột quỵ cấp."
+      },
+      {
+        "id": "dw2",
+        "type": "translation",
+        "prompt": "Tái thông hoàn toàn đạt mức mTICI 3 sau lần kéo đầu tiên.",
+        "targetKeywords": ["recanalization", "mTICI 3", "first pass"],
+        "modelAnswer": "Complete recanalization (mTICI 3) was achieved after the first pass.",
+        "noteVi": "Dùng bị động quá khứ đơn chuẩn tường trình DSA."
+      },
+      {
+        "id": "dw3",
+        "type": "paraphrase",
+        "prompt": "Good collateral blood flow kept the brain tissue alive after 6 hours.",
+        "targetKeywords": ["robust", "collateral circulation", "sustained", "penumbra"],
+        "modelAnswer": "Robust leptomeningeal collateral circulation sustained the ischemic penumbra beyond the 6-hour window.",
+        "noteVi": "Nâng cấp từ vựng phổ thông thành thuật ngữ thần kinh học chuẩn."
+      },
+      {
+        "id": "dw4",
+        "type": "translation",
+        "prompt": "Vi ống thông được luồn cẩn thận qua đoạn huyết khối gây tắc M1.",
+        "targetKeywords": ["microcatheter", "navigated", "occlusive thrombus"],
+        "modelAnswer": "The microcatheter was carefully navigated across the occlusive M1 thrombus.",
+        "noteVi": "'Navigate across' diễn tả chính xác thao tác luồn vi ống thông qua huyết khối."
+      },
+      {
+        "id": "dw5",
+        "type": "paraphrase",
+        "prompt": "Because the carotid artery was very twisted, we used wrist access instead.",
+        "targetKeywords": ["severe", "tortuosity", "prompted", "transradial access"],
+        "modelAnswer": "Severe cervical carotid tortuosity prompted a transition to transradial access.",
+        "noteVi": "Dùng danh từ 'tortuosity' và thuật ngữ 'transradial access' (đường vào động mạch quay)."
+      },
+      {
+        "id": "dw6",
+        "type": "translation",
+        "prompt": "Hút liên tục đầu gần giúp giảm nguy cơ thuyên tắc mảnh huyết khối ra nhánh xa.",
+        "targetKeywords": ["continuous proximal aspiration", "incidence", "distal embolization"],
+        "modelAnswer": "Continuous proximal aspiration reduces the incidence of distal embolization.",
+        "noteVi": "Cấu trúc súc tích chuẩn báo cáo khoa học."
+      },
+      {
+        "id": "dw7",
+        "type": "paraphrase",
+        "prompt": "After we removed the sheath, we stopped the bleeding with a closure device.",
+        "targetKeywords": ["Following", "hemostasis", "vascular closure device"],
+        "modelAnswer": "Following sheath removal, hemostasis was achieved using a vascular closure device.",
+        "noteVi": "Áp dụng mệnh đề 'Following + N' và câu bị động."
+      },
+      {
+        "id": "dw8",
+        "type": "translation",
+        "prompt": "Chụp mạch kiểm tra xác nhận dòng chảy thuận chiều tốt mà không có co thắt mạch đáng kể.",
+        "targetKeywords": ["control angiography", "antegrade flow", "vasospasm"],
+        "modelAnswer": "Control angiography confirmed brisk antegrade flow without significant vasospasm.",
+        "noteVi": "'Brisk antegrade flow' và 'vasospasm' là cặp thuật ngữ đọc phim DSA chuẩn."
+      }
+    ],
+    "essayTask": {
+      "prompt": "Write a concise clinical imaging & procedural summary (150+ words) for a 68-year-old patient with acute left M1 occlusion presenting 8 hours after onset, covering baseline CT/CTA/CTP selection, combined thrombectomy technique, and final mTICI 3 outcome.",
+      "minWords": 150,
+      "recommendedMinutes": 20,
+      "models": {
+        "band7": "A 68-year-old patient presented eight hours after onset with acute right-sided weakness. Baseline non-contrast CT excluded intracranial hemorrhage and revealed an ASPECTS score of nine. CT angiography confirmed a proximal left M1 occlusion with good collateral circulation, and CT perfusion demonstrated a small ischemic core with a large salvageable penumbra.\n\nBased on this favorable mismatch profile, the patient underwent mechanical thrombectomy. Via right femoral access, an 8F balloon guide catheter was positioned in the left internal carotid artery. A microcatheter and distal aspiration catheter were navigated to the occlusion site, and a stent retriever was deployed across the thrombus.\n\nAfter clot integration, the stent retriever was withdrawn under continuous proximal aspiration. Final control angiography confirmed complete mTICI 3 recanalization on the first pass without distal embolization or hemorrhage.",
+        "band8": "A 68-year-old patient presented eight hours from last known well with acute right hemiparesis and aphasia. Rapid multimodal imaging was performed for late-window selection: non-contrast CT excluded acute intracranial hemorrhage (ASPECTS 9), multiphase CTA localized a proximal left M1 occlusion supported by robust leptomeningeal collaterals, and CT perfusion confirmed a target mismatch with minimal infarct core and an extensive salvageable penumbra.\n\nUnder roadmap guidance via right common femoral access, a triaxial system comprising an 8F balloon guide catheter, large-bore distal aspiration catheter, and microcatheter was advanced into the left internal carotid artery. Following confirmation of distal luminal positioning, a stent retriever was deployed across the occlusive thrombus.\n\nWith proximal flow arrest and continuous aspiration, single-pass retrieval achieved complete mTICI 3 reperfusion without distal embolization or procedural vasospasm. Following sheath removal, femoral hemostasis was secured using a vascular closure device.",
+        "band9": "A 68-year-old patient arrived in the extended 8-hour therapeutic window exhibiting acute right hemiparesis and expressive aphasia. Baseline non-contrast CT ruled out hemorrhage and preserved cortical architecture (ASPECTS 9), while multiphase CTA identified an abrupt proximal left M1 cutoff bolstered by robust leptomeningeal collateral flow. Subsequent CT perfusion delineated a classic target mismatch profile—a negligible ischemic core surrounded by a substantial salvageable penumbra—justifying emergent endovascular intervention.\n\nThrough right common femoral access, an 8F balloon guide catheter was anchored in the distal cervical internal carotid artery to provide stable proximal support. A large-bore aspiration catheter was tracked coaxially to the thrombus face, and a stent retriever was unsheathed across the occluded M1 segment via microcatheter guidance. Following brief clot integration, synchronized withdrawal under balloon flow arrest and continuous aspiration yielded a first-pass effect with complete mTICI 3 recanalization and brisk antegrade filling across all distal branches. No distal embolization, dissection, or extravasation was observed, and arteriotomy hemostasis was achieved uneventfully via a vascular closure device."
+      }
+    }
+  },
+  "speaking": {
+    "stages": [
+      {
+        "stage": 1,
+        "title": "Stage 1 — Rapid Neuroimaging Check",
+        "prompts": [
+          {
+            "question": "How do you describe a hyperdense MCA sign on baseline non-contrast CT?",
+            "sampleAnswer": "It appears as focal hyperattenuation within the proximal M1 segment, strongly suggesting acute intraluminal thrombus prior to contrast administration.",
+            "hintVi": "Dùng 'focal hyperattenuation' và 'intraluminal thrombus'."
+          },
+          {
+            "question": "Why is collateral grading on CTA important before entering the cath lab?",
+            "sampleAnswer": "Strong leptomeningeal collaterals preserve the ischemic penumbra longer and generally predict better functional outcomes following recanalization.",
+            "hintVi": "Liên kết collateral -> penumbra -> functional outcomes."
+          }
+        ]
+      },
+      {
+        "stage": 2,
+        "title": "Stage 2 — Cath-Lab Case Presentation (1 min prep · 2 min speak)",
+        "prepSeconds": 60,
+        "speakSeconds": 120,
+        "cueCard": "Present a late-window acute left M1 occlusion case treated successfully with combined mechanical thrombectomy.",
+        "bulletPoints": [
+          "Patient presentation & baseline NCCT / CTA / CTP findings",
+          "Vascular access and triaxial catheter setup",
+          "Retrieval technique and flow-arrest strategy",
+          "Final mTICI grade and complication check"
+        ],
+        "sampleAnswer": "Good afternoon everyone. Today I am presenting a 68-year-old patient who arrived eight hours after symptom onset with acute right hemiparesis. Baseline non-contrast CT showed an ASPECTS score of nine with no hemorrhage, and CTA confirmed a proximal left M1 occlusion with strong collaterals...",
+        "prompts": []
+      },
+      {
+        "stage": 3,
+        "title": "Stage 3 — Interventional Strategy Discussion",
+        "prompts": [
+          {
+            "question": "When would you consider switching from transfemoral to transradial access in neuro-DSA?",
+            "sampleAnswer": "I would favor transradial access in patients with a bovine or type-three aortic arch, severe iliofemoral tortuosity, or morbid obesity where femoral closure carries higher bleeding risk.",
+            "hintVi": "Nêu giải phẫu cung ĐMC (type III / bovine arch) và nguy cơ chảy máu vùng bẹn."
+          }
+        ]
+      }
+    ],
+    "shadowing": {
+      "simple": [
+        {
+          "id": "dsh_s1",
+          "en": "The angiogram shows / complete occlusion / of the left M1 segment.",
+          "vi": "Hình chụp mạch cho thấy tắc hoàn toàn đoạn M1 trái."
+        },
+        {
+          "id": "dsh_s2",
+          "en": "Complete recanalization / was achieved / after the first pass.",
+          "vi": "Tái thông hoàn toàn đã đạt được ngay sau lần kéo đầu tiên."
+        }
+      ],
+      "complex": [
+        {
+          "id": "dsh_c1",
+          "en": "Following deployment of the stent retriever / under continuous proximal aspiration, / full mTICI three reperfusion was restored / without distal embolization.",
+          "vi": "Sau khi bung stent kéo kết hợp hút liên tục đầu gần, tái tưới máu hoàn toàn mTICI 3 đã được khôi phục mà không gây thuyên tắc xa."
+        },
+        {
+          "id": "dsh_c2",
+          "en": "In patients presenting beyond six hours, / CT perfusion distinguishes the irreversible ischemic core / from the salvageable penumbra / to guide endovascular selection.",
+          "vi": "Ở bệnh nhân đến viện sau 6 giờ, CT tưới máu phân biệt lõi nhồi máu không hồi phục với vùng tranh tối tranh sáng còn cứu được để định hướng chọn lựa can thiệp nội mạch."
+        }
+      ]
+    }
+  }
+}
