@@ -72,6 +72,11 @@ interface AppContextValue {
   addXp: (amount: number) => void;
   markSkillComplete: (lessonId: string, skill: SkillKey, bonusXp?: number, stars?: number) => void;
   saveWritingDraft: (lessonId: string, text: string) => void;
+  saveParaphraseDraft: (lessonId: string, taskId: string, text: string) => void;
+  toggleWritingRubric: (lessonId: string, index: number) => void;
+  saveSpeakingNote: (lessonId: string, key: string, text: string) => void;
+  toggleSpeakingRubric: (lessonId: string, index: number) => void;
+  toggleListeningFlag: (lessonId: string, sentenceId: string) => void;
   toggleParaphraseDone: (lessonId: string, taskId: string) => void;
   saveNotebook: (lessonId: string, content: string) => void;
   addLessonVocab: (lessonId: string, item: VocabItem, alsoAddToSrs?: boolean) => void;
@@ -474,6 +479,116 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [mutateState]
   );
 
+  const saveParaphraseDraft = useCallback(
+    (lessonId: string, taskId: string, text: string) => {
+      const clean = sanitizePlainText(text, 3000);
+      mutateState((prev) => {
+        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
+        return {
+          ...prev,
+          lessonProgress: {
+            ...prev.lessonProgress,
+            [lessonId]: {
+              ...cur,
+              writingParaphraseDrafts: {
+                ...(cur.writingParaphraseDrafts || {}),
+                [taskId]: clean,
+              },
+              lastOpenedAt: Date.now(),
+            },
+          },
+        };
+      });
+    },
+    [mutateState]
+  );
+
+  const toggleWritingRubric = useCallback(
+    (lessonId: string, index: number) => {
+      mutateState((prev) => {
+        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
+        const currentMap = cur.writingRubric || {};
+        return {
+          ...prev,
+          lessonProgress: {
+            ...prev.lessonProgress,
+            [lessonId]: {
+              ...cur,
+              writingRubric: { ...currentMap, [index]: !currentMap[index] },
+              lastOpenedAt: Date.now(),
+            },
+          },
+        };
+      });
+    },
+    [mutateState]
+  );
+
+  const saveSpeakingNote = useCallback(
+    (lessonId: string, key: string, text: string) => {
+      const clean = sanitizePlainText(text, 5000);
+      mutateState((prev) => {
+        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
+        return {
+          ...prev,
+          lessonProgress: {
+            ...prev.lessonProgress,
+            [lessonId]: {
+              ...cur,
+              speakingNotes: { ...(cur.speakingNotes || {}), [key]: clean },
+              lastOpenedAt: Date.now(),
+            },
+          },
+        };
+      });
+    },
+    [mutateState]
+  );
+
+  const toggleSpeakingRubric = useCallback(
+    (lessonId: string, index: number) => {
+      mutateState((prev) => {
+        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
+        const currentMap = cur.speakingRubric || {};
+        return {
+          ...prev,
+          lessonProgress: {
+            ...prev.lessonProgress,
+            [lessonId]: {
+              ...cur,
+              speakingRubric: { ...currentMap, [index]: !currentMap[index] },
+              lastOpenedAt: Date.now(),
+            },
+          },
+        };
+      });
+    },
+    [mutateState]
+  );
+
+  const toggleListeningFlag = useCallback(
+    (lessonId: string, sentenceId: string) => {
+      mutateState((prev) => {
+        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
+        const set = new Set(cur.listeningFlaggedIds || []);
+        if (set.has(sentenceId)) set.delete(sentenceId);
+        else set.add(sentenceId);
+        return {
+          ...prev,
+          lessonProgress: {
+            ...prev.lessonProgress,
+            [lessonId]: {
+              ...cur,
+              listeningFlaggedIds: Array.from(set),
+              lastOpenedAt: Date.now(),
+            },
+          },
+        };
+      });
+    },
+    [mutateState]
+  );
+
   const toggleParaphraseDone = useCallback(
     (lessonId: string, taskId: string) => {
       mutateState((prev) => {
@@ -581,19 +696,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isCustom: true,
       };
 
-      mutateState((prev) => {
-        const cur = prev.customVocabByLesson[lessonId] || [];
-        return {
-          ...prev,
-          customVocabByLesson: {
-            ...prev.customVocabByLesson,
-            [lessonId]: [cleanItem, ...cur],
-          },
-        };
-      });
+      const currentSnap = latestStateRef.current;
+      const existingCustomSnap = currentSnap.customVocabByLesson[lessonId] || [];
+      const baseLesson =
+        importedLessons.find((l) => l.id === lessonId) ||
+        builtInLessons.find((l) => l.id === lessonId);
+      const alreadyInLesson =
+        existingCustomSnap.some((v) => v.term.trim().toLowerCase() === cleanTerm.toLowerCase()) ||
+        (baseLesson?.vocabulary || []).some(
+          (v) => v.term.trim().toLowerCase() === cleanTerm.toLowerCase()
+        );
+
+      if (!alreadyInLesson) {
+        mutateState((prev) => {
+          const cur = prev.customVocabByLesson[lessonId] || [];
+          return {
+            ...prev,
+            customVocabByLesson: {
+              ...prev.customVocabByLesson,
+              [lessonId]: [cleanItem, ...cur],
+            },
+          };
+        });
+      }
 
       if (alsoAddToSrs) {
-        addCardToSrs({
+        const srsAdded = addCardToSrs({
           front: cleanItem.term,
           meaning: cleanItem.meaningVi,
           ipa: cleanItem.ipa,
@@ -602,11 +730,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           source: 'lesson',
           lessonId,
         });
-      } else {
+        if (!alreadyInLesson && srsAdded) {
+          showToast(`Đã lưu "${cleanItem.term}" vào Flashcard bài học & SRS!`);
+        } else if (!alreadyInLesson) {
+          showToast(`Đã lưu "${cleanItem.term}" vào Flashcard bài học (đã có trong SRS).`);
+        }
+      } else if (!alreadyInLesson) {
         showToast(`Đã thêm thẻ "${cleanItem.term}" vào bài học!`);
+      } else {
+        showToast(`"${cleanItem.term}" đã có sẵn trong Flashcard của bài học này.`);
       }
     },
-    [mutateState, addCardToSrs, showToast]
+    [mutateState, addCardToSrs, showToast, builtInLessons, importedLessons]
   );
 
   const bulkAddLessonVocab = useCallback(
@@ -1292,6 +1427,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addXp,
         markSkillComplete,
         saveWritingDraft,
+        saveParaphraseDraft,
+        toggleWritingRubric,
+        saveSpeakingNote,
+        toggleSpeakingRubric,
+        toggleListeningFlag,
         toggleParaphraseDone,
         saveNotebook,
         addLessonVocab,

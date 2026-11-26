@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  BookmarkPlus,
   CheckCircle2,
   Clock,
   Eye,
@@ -26,14 +27,35 @@ interface SpeakingTabProps {
   lesson: LessonPack;
 }
 
+const SPEAKING_RUBRIC_CRITERIA = [
+  'Từ vựng & thuật ngữ chuyên ngành chính xác (dùng tự nhiên, đúng ngữ cảnh)',
+  'Cấu trúc ngữ pháp rõ ràng, ít vấp thì hoặc sai bị động',
+  'Độ mạch lạc, nhịp ngắt & phát âm rõ ràng dễ nghe',
+  'Bám sát trọng tâm câu hỏi / ca lâm sàng được yêu cầu',
+];
+
 export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
-  const { prefs, markSkillComplete, showToast } = useApp();
+  const {
+    prefs,
+    state,
+    saveSpeakingNote,
+    toggleSpeakingRubric,
+    addLessonVocab,
+    markSkillComplete,
+    showToast,
+  } = useApp();
   const { speaking } = lesson;
+
+  const progress = state.lessonProgress[lesson.id];
+  const speakingNotes = progress?.speakingNotes || {};
+  const speakingRubric = progress?.speakingRubric || {};
+  const rubricScore = SPEAKING_RUBRIC_CRITERIA.filter((_, i) => Boolean(speakingRubric[i])).length;
 
   const [section, setSection] = useState<'stages' | 'shadowing'>('stages');
   const [shadowLevel, setShadowLevel] = useState<'simple' | 'complex'>('simple');
   const [speed, setSpeed] = useState<number>(prefs.ttsRate || 0.95);
   const [shownSamples, setShownSamples] = useState<Record<string, boolean>>({});
+  const [showShadowVi, setShowShadowVi] = useState(true);
 
   // Resilient Speech + Offline MediaRecorder + OS Dictation Self-Check
   const [cloudUnavailable, setCloudUnavailable] = useState(false);
@@ -88,7 +110,6 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
         }
       },
       onNetworkError: () => {
-        // Gracefully switch to Offline Recorder + OS Dictation Self-Check without ugly error!
         setCloudUnavailable(true);
         setRecordingSpeechId(null);
         setStopSpeechRecFn(null);
@@ -138,7 +159,31 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
     }
   };
 
-  const renderPronunciationPanel = (id: string, targetText: string) => {
+  const saveExpressionCard = (enText: string, viMeaning: string, contextNote: string) => {
+    const cleanEn = enText.replace(/\s*\/\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!cleanEn) return;
+    addLessonVocab(
+      lesson.id,
+      {
+        termKey: '',
+        term: cleanEn.length > 90 ? `${cleanEn.slice(0, 87)}...` : cleanEn,
+        ipa: '',
+        pos: 'speaking phrase',
+        wordRoot: '',
+        meaningVi: viMeaning || 'Cấu trúc luyện nói chuyên ngành',
+        noteVi: contextNote,
+        exampleEn: cleanEn,
+        exampleVi: viMeaning,
+      },
+      true
+    );
+  };
+
+  const renderPronunciationPanel = (
+    id: string,
+    targetText: string,
+    saveMeta?: { viMeaning: string; note: string }
+  ) => {
     const res = pronResults[id];
     const isCloudRec = recordingSpeechId === id;
     const isAudioRec = recordingAudioId === id;
@@ -170,12 +215,24 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
           )}
 
           <button
-            className={`btn btn-sm ${isAudioRec ? 'btn-danger' : cloudUnavailable ? 'btn-primary' : ''}`}
+            className={`btn btn-sm ${
+              isAudioRec ? 'btn-danger' : cloudUnavailable ? 'btn-primary' : ''
+            }`}
             onClick={() => handleOfflineAudioRecord(id)}
           >
             {isAudioRec ? <Square size={13} /> : <Radio size={14} />}{' '}
             {isAudioRec ? 'Đang ghi âm... (Dừng)' : 'Ghi âm cục bộ (Offline)'}
           </button>
+
+          {saveMeta && (
+            <button
+              className="btn btn-sm"
+              title="Lưu câu / cách diễn đạt vào Flashcard bài học & SRS"
+              onClick={() => saveExpressionCard(targetText, saveMeta.viMeaning, saveMeta.note)}
+            >
+              <BookmarkPlus size={14} /> Lưu Flashcard & SRS
+            </button>
+          )}
         </div>
 
         {isCloudRec && interimText && (
@@ -196,7 +253,7 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
         {cloudUnavailable && (
           <div className="card-subtle stack-sm" style={{ padding: '10px 12px' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              💡 <strong>Mẹo chấm khớp từ Offline:</strong> Bấm phím <strong>Fn × 2</strong> (MacBook) hoặc biểu tượng <strong>Mic trên bàn phím iPad/iPhone</strong> để đọc trực tiếp vào ô dưới rồi bấm <em>Chấm khớp từ</em>:
+              💡 <strong>Mẹo chấm khớp từ Offline:</strong> Bấm phím <strong>Fn × 2</strong> (MacBook) hoặc biểu tượng <strong>Mic trên bàn phím iPad/iPhone</strong> để đọc trực tiếp vào ô dưới rồi bấm <em>Chấm khớp</em>:
             </div>
             <div className="flex-row" style={{ gap: 6 }}>
               <input
@@ -249,15 +306,18 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
   return (
     <div className="stack-md">
       {cloudUnavailable && (
-        <div className="card-subtle flex-between flex-wrap" style={{ borderColor: 'var(--accent-border)' }}>
+        <div
+          className="card-subtle flex-between flex-wrap"
+          style={{ borderColor: 'var(--accent-border)' }}
+        >
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-            <WifiOff size={15} style={{ verticalAlign: '-2px', marginRight: 6, color: 'var(--accent)' }} />
-            <strong>Chế độ Luyện nói Offline đang bật:</strong> Trình duyệt hiện không kết nối dịch vụ Speech Cloud (lỗi <code className="mono">network</code> đã được xử lý tự động). Bạn có thể <strong>Ghi âm cục bộ</strong> và dùng <strong>Dictation bàn phím (Fn×2)</strong> để chấm % khớp hoàn toàn mượt mà!
+            <WifiOff
+              size={15}
+              style={{ verticalAlign: '-2px', marginRight: 6, color: 'var(--accent)' }}
+            />
+            <strong>Chế độ Luyện nói Offline đang bật:</strong> Trình duyệt hiện không kết nối dịch vụ Speech Cloud (lỗi <code className="mono">network</code> đã được xử lý tự động). Bạn có thể <strong>Ghi âm cục bộ</strong> và dùng <strong>Dictation bàn phím (Fn×2)</strong> để chấm % khớp!
           </span>
-          <button
-            className="btn btn-sm"
-            onClick={() => setCloudUnavailable(false)}
-          >
+          <button className="btn btn-sm" onClick={() => setCloudUnavailable(false)}>
             Thử lại Cloud Speech
           </button>
         </div>
@@ -303,121 +363,182 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
         </div>
       </div>
 
-      {/* Section 1: 3 Stages */}
+      {/* Section 1: 3 Stages + Auto-Saved Speaking Notes + Self-Assessment Checklist */}
       {section === 'stages' && (
         <div className="stack-md">
-          {speaking.stages.map((st) => (
-            <div key={st.stage} className="card stack-md">
-              <div className="flex-between flex-wrap">
-                <div>
-                  <span className="badge badge-accent">Stage {st.stage}</span>
-                  <h3 style={{ margin: '6px 0 0', fontSize: '1.1rem' }}>{st.title}</h3>
-                </div>
-
-                {st.stage === 2 && (
-                  <div className="flex-row flex-wrap">
-                    <span className="badge mono badge-warning">
-                      <Clock size={13} />{' '}
-                      {timerPhase === 'idle'
-                        ? 'Sẵn sàng'
-                        : timerPhase === 'prep'
-                          ? `Chuẩn bị: ${timerSec}s`
-                          : `Đang nói: ${String(Math.floor(timerSec / 60)).padStart(2, '0')}:${String(
-                              timerSec % 60
-                            ).padStart(2, '0')}`}
-                    </span>
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={() => {
-                        setTimerPhase('prep');
-                        setTimerSec(st.prepSeconds || 60);
-                      }}
-                    >
-                      <Play size={13} /> 1p chuẩn bị + 2p nói
-                    </button>
-                    {timerPhase !== 'idle' && (
-                      <button className="btn btn-sm" onClick={() => setTimerPhase('idle')}>
-                        <RotateCcw size={13} /> Dừng
-                      </button>
-                    )}
+          {speaking.stages.map((st) => {
+            const noteKey = `stage_${st.stage}`;
+            const stageNoteVal = speakingNotes[noteKey] || '';
+            return (
+              <div key={st.stage} className="card stack-md">
+                <div className="flex-between flex-wrap">
+                  <div>
+                    <span className="badge badge-accent">Stage {st.stage}</span>
+                    <h3 style={{ margin: '6px 0 0', fontSize: '1.1rem' }}>{st.title}</h3>
                   </div>
-                )}
-              </div>
 
-              {st.cueCard && (
-                <div className="card-subtle stack-sm" style={{ borderLeft: '4px solid var(--accent)' }}>
-                  <div style={{ fontWeight: 700 }}>{st.cueCard}</div>
-                  {st.bulletPoints && st.bulletPoints.length > 0 && (
-                    <ul style={{ margin: 0, paddingLeft: 20 }}>
-                      {st.bulletPoints.map((b, i) => (
-                        <li key={i} style={{ fontSize: '0.9rem' }}>
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {st.sampleAnswer && (
-                    <div className="stack-sm" style={{ marginTop: 6 }}>
+                  {st.stage === 2 && (
+                    <div className="flex-row flex-wrap">
+                      <span className="badge mono badge-warning">
+                        <Clock size={13} />{' '}
+                        {timerPhase === 'idle'
+                          ? 'Sẵn sàng'
+                          : timerPhase === 'prep'
+                            ? `Chuẩn bị: ${timerSec}s`
+                            : `Đang nói: ${String(Math.floor(timerSec / 60)).padStart(2, '0')}:${String(
+                                timerSec % 60
+                              ).padStart(2, '0')}`}
+                      </span>
                       <button
-                        className="btn btn-sm"
-                        style={{ alignSelf: 'flex-start' }}
-                        onClick={() =>
-                          setShownSamples((p) => ({
-                            ...p,
-                            [`st_${st.stage}`]: !p[`st_${st.stage}`],
-                          }))
-                        }
+                        className="btn btn-sm btn-primary"
+                        onClick={() => {
+                          setTimerPhase('prep');
+                          setTimerSec(st.prepSeconds || 60);
+                        }}
                       >
-                        <Eye size={14} />{' '}
-                        {shownSamples[`st_${st.stage}`] ? 'Ẩn gợi ý trả lời' : 'Xem gợi ý trả lời'}
+                        <Play size={13} /> 1p chuẩn bị + 2p nói
                       </button>
-                      {shownSamples[`st_${st.stage}`] && (
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                          {st.sampleAnswer}
-                        </div>
+                      {timerPhase !== 'idle' && (
+                        <button className="btn btn-sm" onClick={() => setTimerPhase('idle')}>
+                          <RotateCcw size={13} /> Dừng
+                        </button>
                       )}
-                      {renderPronunciationPanel(`st_${st.stage}_cue`, st.sampleAnswer)}
                     </div>
                   )}
                 </div>
-              )}
 
-              {st.prompts.map((pr, idx) => {
-                const key = `st${st.stage}_p${idx}`;
-                return (
-                  <div key={key} className="card-subtle stack-sm">
-                    <div style={{ fontWeight: 600 }}>
-                      Q{idx + 1}. {pr.question}
-                    </div>
-                    {pr.hintVi && (
-                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                        💡 Gợi ý: {pr.hintVi}
-                      </div>
+                {st.cueCard && (
+                  <div
+                    className="card-subtle stack-sm"
+                    style={{ borderLeft: '4px solid var(--accent)' }}
+                  >
+                    <div style={{ fontWeight: 700 }}>{st.cueCard}</div>
+                    {st.bulletPoints && st.bulletPoints.length > 0 && (
+                      <ul style={{ margin: 0, paddingLeft: 20 }}>
+                        {st.bulletPoints.map((b, i) => (
+                          <li key={i} style={{ fontSize: '0.9rem' }}>
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
                     )}
-                    {pr.sampleAnswer && (
-                      <>
+                    {st.sampleAnswer && (
+                      <div className="stack-sm" style={{ marginTop: 6 }}>
                         <button
                           className="btn btn-sm"
                           style={{ alignSelf: 'flex-start' }}
                           onClick={() =>
-                            setShownSamples((p) => ({ ...p, [key]: !p[key] }))
+                            setShownSamples((p) => ({
+                              ...p,
+                              [`st_${st.stage}`]: !p[`st_${st.stage}`],
+                            }))
                           }
                         >
-                          <Eye size={14} /> {shownSamples[key] ? 'Ẩn mẫu' : 'Câu trả lời mẫu'}
+                          <Eye size={14} />{' '}
+                          {shownSamples[`st_${st.stage}`]
+                            ? 'Ẩn gợi ý trả lời'
+                            : 'Xem gợi ý trả lời'}
                         </button>
-                        {shownSamples[key] && (
+                        {shownSamples[`st_${st.stage}`] && (
                           <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                            {pr.sampleAnswer}
+                            {st.sampleAnswer}
                           </div>
                         )}
-                        {renderPronunciationPanel(key, pr.sampleAnswer)}
-                      </>
+                        {renderPronunciationPanel(`st_${st.stage}_cue`, st.sampleAnswer, {
+                          viMeaning: st.cueCard,
+                          note: `Speaking Stage ${st.stage} Cue Card`,
+                        })}
+                      </div>
                     )}
                   </div>
-                );
-              })}
+                )}
+
+                {st.prompts.map((pr, idx) => {
+                  const key = `st${st.stage}_p${idx}`;
+                  return (
+                    <div key={key} className="card-subtle stack-sm">
+                      <div style={{ fontWeight: 600 }}>
+                        Q{idx + 1}. {pr.question}
+                      </div>
+                      {pr.hintVi && (
+                        <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                          💡 Gợi ý: {pr.hintVi}
+                        </div>
+                      )}
+                      {pr.sampleAnswer && (
+                        <>
+                          <button
+                            className="btn btn-sm"
+                            style={{ alignSelf: 'flex-start' }}
+                            onClick={() =>
+                              setShownSamples((p) => ({ ...p, [key]: !p[key] }))
+                            }
+                          >
+                            <Eye size={14} /> {shownSamples[key] ? 'Ẩn mẫu' : 'Câu trả lời mẫu'}
+                          </button>
+                          {shownSamples[key] && (
+                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                              {pr.sampleAnswer}
+                            </div>
+                          )}
+                          {renderPronunciationPanel(key, pr.sampleAnswer, {
+                            viMeaning: pr.hintVi || pr.question,
+                            note: `Speaking Stage ${st.stage} · ${pr.question}`,
+                          })}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Persistent Auto-Saved Speaking Outline / Notes */}
+                <div className="stack-sm">
+                  <div className="flex-between" style={{ fontSize: '0.8rem' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-muted)' }}>
+                      Ghi chú dàn ý nói — Stage {st.stage}
+                    </span>
+                    {stageNoteVal.trim() && (
+                      <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
+                        Đã tự lưu nháp
+                      </span>
+                    )}
+                  </div>
+                  <textarea
+                    className="textarea"
+                    style={{ minHeight: 72 }}
+                    placeholder="Ghi gạch đầu dòng ý chính, từ khóa hoặc câu mở đầu cho phần nói (tự động lưu)..."
+                    value={stageNoteVal}
+                    onChange={(e) => saveSpeakingNote(lesson.id, noteKey, e.target.value)}
+                  />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Speaking Self-Assessment Checklist */}
+          <div className="card stack-sm">
+            <div className="flex-between">
+              <strong style={{ fontSize: '0.92rem' }}>Checklist tự đánh giá Speaking</strong>
+              <span className={`badge ${rubricScore === 4 ? 'badge-success' : 'badge-accent'}`}>
+                {rubricScore}/4 tiêu chí
+              </span>
             </div>
-          ))}
+            {SPEAKING_RUBRIC_CRITERIA.map((crit, idx) => (
+              <label
+                key={idx}
+                className="flex-row"
+                style={{ fontSize: '0.86rem', cursor: 'pointer', alignItems: 'flex-start' }}
+              >
+                <input
+                  type="checkbox"
+                  style={{ marginTop: 4 }}
+                  checked={Boolean(speakingRubric[idx])}
+                  onChange={() => toggleSpeakingRubric(lesson.id, idx)}
+                />
+                <span>{crit}</span>
+              </label>
+            ))}
+          </div>
         </div>
       )}
 
@@ -439,9 +560,12 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
                 Complex ({speaking.shadowing.complex.length} câu)
               </button>
             </div>
-            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Dấu <code className="mono">/</code> đánh dấu nhịp ngắt hơi tự nhiên khi đọc đuổi (Shadowing).
-            </span>
+            <button
+              className="btn btn-sm"
+              onClick={() => setShowShadowVi((v) => !v)}
+            >
+              <Eye size={14} /> {showShadowVi ? 'Ẩn nghĩa tiếng Việt' : 'Hiện nghĩa tiếng Việt'}
+            </button>
           </div>
 
           {shadowItems.map((item, idx) => (
@@ -452,10 +576,13 @@ export const SpeakingTab: React.FC<SpeakingTabProps> = ({ lesson }) => {
               <div style={{ fontSize: '1.08rem', fontWeight: 600, lineHeight: 1.7 }}>
                 {item.en}
               </div>
-              {item.vi && (
+              {showShadowVi && item.vi && (
                 <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>{item.vi}</div>
               )}
-              {renderPronunciationPanel(item.id, item.en)}
+              {renderPronunciationPanel(item.id, item.en, {
+                viMeaning: item.vi || 'Câu luyện Shadowing',
+                note: `Shadowing ${shadowLevel} — ${lesson.meta.title}`,
+              })}
             </div>
           ))}
         </div>

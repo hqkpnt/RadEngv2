@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Award,
+  BookmarkPlus,
   CheckCircle2,
   Clock,
   Languages,
@@ -19,8 +20,32 @@ interface ReadingTabProps {
 }
 
 export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => {
-  const { prefs, state, addCardToSrs, toggleMastered, markSkillComplete, showToast } = useApp();
+  const {
+    prefs,
+    state,
+    addCardToSrs,
+    addLessonVocab,
+    toggleMastered,
+    markSkillComplete,
+    showToast,
+  } = useApp();
   const { reading } = lesson;
+
+  const findContextForTerm = (term: string): { exampleEn: string; exampleVi: string } => {
+    const lower = term.toLowerCase();
+    for (const para of reading.paragraphs) {
+      if (para.en.toLowerCase().includes(lower)) {
+        const sentences = para.en.split(/(?<=[.!?])\s+/);
+        const matchedSentence =
+          sentences.find((s) => s.toLowerCase().includes(lower)) || para.en;
+        return { exampleEn: matchedSentence.trim(), exampleVi: para.vi || '' };
+      }
+    }
+    return {
+      exampleEn: reading.paragraphs[0]?.en || '',
+      exampleVi: reading.paragraphs[0]?.vi || '',
+    };
+  };
 
   const [showAllVi, setShowAllVi] = useState(false);
   const [openViParas, setOpenViParas] = useState<Record<string, boolean>>({});
@@ -150,6 +175,30 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                 <Volume2 size={13} /> Nghe
               </button>
               <button
+                className="btn btn-sm btn-primary"
+                title="Lưu thuật ngữ kèm câu ngữ cảnh trong bài đọc vào Flashcard bài học & SRS"
+                onClick={() => {
+                  const ctx = findContextForTerm(activeGlossary.term);
+                  addLessonVocab(
+                    lesson.id,
+                    {
+                      termKey: activeGlossary.termKey,
+                      term: activeGlossary.term,
+                      ipa: activeGlossary.ipa,
+                      pos: 'glossary',
+                      wordRoot: activeGlossary.wordRoot,
+                      meaningVi: activeGlossary.meaningVi,
+                      noteVi: `Trích từ bài đọc: ${reading.title}`,
+                      exampleEn: ctx.exampleEn,
+                      exampleVi: ctx.exampleVi,
+                    },
+                    true
+                  );
+                }}
+              >
+                <BookmarkPlus size={13} /> Lưu Flashcard & SRS
+              </button>
+              <button
                 className="btn btn-sm"
                 onClick={() =>
                   addCardToSrs({
@@ -163,7 +212,7 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                   })
                 }
               >
-                <Layers size={13} /> + Ôn tập SRS
+                <Layers size={13} /> Chỉ thêm SRS
               </button>
               <button
                 className={`btn btn-sm ${state.masteredBank[activeGlossary.termKey] ? 'btn-success' : ''}`}

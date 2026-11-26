@@ -1,11 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BookmarkPlus,
   CheckCircle2,
   Eye,
+  EyeOff,
+  Flag,
   HelpCircle,
   Play,
   Radio,
   RotateCcw,
+  SkipBack,
+  SkipForward,
   Square,
   Upload,
   Volume2,
@@ -27,8 +32,19 @@ interface ListeningTabProps {
 }
 
 export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
-  const { prefs, updatePrefs, markSkillComplete, showToast } = useApp();
+  const {
+    prefs,
+    state,
+    updatePrefs,
+    toggleListeningFlag,
+    addLessonVocab,
+    markSkillComplete,
+    showToast,
+  } = useApp();
   const { listening } = lesson;
+
+  const flaggedIds = state.lessonProgress[lesson.id]?.listeningFlaggedIds || [];
+  const flaggedSet = useMemo(() => new Set(flaggedIds), [flaggedIds]);
 
   const [subMode, setSubMode] = useState<'dictation' | 'gapfill' | 'mcq'>('dictation');
   const [speed, setSpeed] = useState<number>(prefs.ttsRate || 0.95);
@@ -39,8 +55,11 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [speakingSentenceId, setSpeakingSentenceId] = useState<string | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [showViTranslation, setShowViTranslation] = useState(false);
+  const [onlyFlagged, setOnlyFlagged] = useState(false);
   const [customAudioUrl, setCustomAudioUrl] = useState<string | null>(null);
   const audioUploadRef = useRef<HTMLInputElement>(null);
+  const audioElRef = useRef<HTMLAudioElement>(null);
 
   // Sentence-by-sentence dictation state
   const [sentIdx, setSentIdx] = useState(0);
@@ -49,14 +68,26 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
   const [showDictAnswer, setShowDictAnswer] = useState(false);
   const [completedSentIds, setCompletedSentIds] = useState<string[]>([]);
 
+  // Inline quick-save to Flashcard & SRS from active sentence
+  const [quickSaveOpen, setQuickSaveOpen] = useState(false);
+  const [quickTerm, setQuickTerm] = useState('');
+  const [quickMeaning, setQuickMeaning] = useState('');
+
   // Gap-fill & MCQ state
   const [gapAnswers, setGapAnswers] = useState<Record<string, string>>({});
   const [gapChecked, setGapChecked] = useState(false);
   const [mcqAnswers, setMcqAnswers] = useState<Record<string, string>>({});
   const [mcqChecked, setMcqChecked] = useState(false);
 
-  const sentences = listening.transcriptSentences;
-  const activeSentence = sentences[sentIdx];
+  const allSentences = listening.transcriptSentences;
+  const visibleSentences = useMemo(() => {
+    if (!onlyFlagged) return allSentences;
+    const list = allSentences.filter((s) => flaggedSet.has(s.id));
+    return list.length > 0 ? list : allSentences;
+  }, [allSentences, onlyFlagged, flaggedSet]);
+
+  const safeSentIdx = Math.min(sentIdx, Math.max(0, visibleSentences.length - 1));
+  const activeSentence = visibleSentences[safeSentIdx];
 
   useEffect(() => {
     const loadVoices = () => setVoices(getRankedNaturalVoices(prefs.ttsVoice).slice(0, 12));
@@ -74,9 +105,9 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
   };
 
   const playFullNarration = () => {
-    if (sentences.length === 0) return;
+    if (allSentences.length === 0) return;
     setIsPlaying(true);
-    void speakDocumentary(sentences, {
+    void speakDocumentary(allSentences, {
       rate: speed,
       lang: prefs.ttsVoice,
       voiceName: prefs.ttsVoiceName,
@@ -104,6 +135,22 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
     });
   };
 
+  const scrubAudio = (deltaSeconds: number) => {
+    const el = audioElRef.current;
+    if (!el) return;
+    el.currentTime = Math.max(0, Math.min(el.duration || 9999, el.currentTime + deltaSeconds));
+    void el.play().catch(() => {});
+  };
+
+  const switchSentence = (nextIndex: number) => {
+    const clamped = Math.max(0, Math.min(visibleSentences.length - 1, nextIndex));
+    setSentIdx(clamped);
+    setDictInput('');
+    setDictEval(null);
+    setShowDictAnswer(false);
+    setQuickSaveOpen(false);
+  };
+
   const handleCheckDictation = () => {
     if (!activeSentence) return;
     const res = evaluateDictation(activeSentence.en, dictInput);
@@ -112,12 +159,35 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
       if (!completedSentIds.includes(activeSentence.id)) {
         const next = [...completedSentIds, activeSentence.id];
         setCompletedSentIds(next);
-        if (next.length === sentences.length) {
+        if (next.length === allSentences.length) {
           markSkillComplete(lesson.id, 'listening', 25);
           showToast('Tuyệt vời! Hoàn thành Chép chính tả toàn bài (+25 XP)');
         }
       }
     }
+  };
+
+  const handleQuickSaveFromSentence = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeSentence || !quickTerm.trim() || !quickMeaning.trim()) return;
+    addLessonVocab(
+      lesson.id,
+      {
+        termKey: '',
+        term: quickTerm,
+        ipa: '',
+        pos: 'listening phrase',
+        wordRoot: '',
+        meaningVi: quickMeaning,
+        noteVi: `Trích từ bài nghe: ${listening.title}`,
+        exampleEn: activeSentence.en,
+        exampleVi: activeSentence.vi,
+      },
+      true
+    );
+    setQuickTerm('');
+    setQuickMeaning('');
+    setQuickSaveOpen(false);
   };
 
   const effectiveAudioUrl = customAudioUrl || listening.audioUrl;
@@ -143,6 +213,11 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
                   Đang thuyết minh...
                 </span>
               )}
+              {flaggedIds.length > 0 && (
+                <span className="badge badge-warning">
+                  <Flag size={12} /> {flaggedIds.length} câu cần xem lại
+                </span>
+              )}
             </div>
             <h2 style={{ margin: '6px 0 0', fontSize: '1.18rem' }}>{listening.title}</h2>
           </div>
@@ -159,6 +234,14 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
             )}
             <button className="btn btn-sm" onClick={() => setShowTranscript((v) => !v)}>
               <Eye size={14} /> {showTranscript ? 'Ẩn Transcript' : 'Xem Transcript'}
+            </button>
+            <button
+              className={`btn btn-sm ${showViTranslation ? 'btn-soft' : ''}`}
+              onClick={() => setShowViTranslation((v) => !v)}
+              title="Ẩn/hiện nghĩa tiếng Việt khi tự kiểm tra"
+            >
+              {showViTranslation ? <EyeOff size={14} /> : <Eye size={14} />}{' '}
+              {showViTranslation ? 'Ẩn nghĩa Việt' : 'Hiện nghĩa Việt'}
             </button>
             <button
               className="btn btn-sm btn-soft"
@@ -237,17 +320,26 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
               <option value={1.15}>1.15x</option>
             </select>
           </div>
-
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            Mẹo macOS/iPad: Tải giọng <em>Daniel/Ava (Enhanced/Premium)</em> trong Cài đặt Trợ năng để nghe cực tự nhiên.
-          </span>
         </div>
 
+        {/* Studio Audio Player + Quick -5s / +5s Scrub */}
         {effectiveAudioUrl && (
-          <audio controls src={effectiveAudioUrl} style={{ width: '100%', height: 38 }} />
+          <div className="flex-row flex-wrap" style={{ gap: 8 }}>
+            <button className="btn btn-sm" onClick={() => scrubAudio(-5)} title="Tua lùi 5 giây">
+              <SkipBack size={14} /> -5s
+            </button>
+            <audio
+              ref={audioElRef}
+              controls
+              src={effectiveAudioUrl}
+              style={{ flex: 1, minWidth: 220, height: 38 }}
+            />
+            <button className="btn btn-sm" onClick={() => scrubAudio(5)} title="Tua tới 5 giây">
+              +5s <SkipForward size={14} />
+            </button>
+          </div>
         )}
 
-        {/* RadEng v3.1 notesTemplate support */}
         {listening.notesTemplate && listening.notesTemplate.length > 0 && (
           <div className="card-subtle stack-sm">
             <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)' }}>
@@ -263,18 +355,42 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
 
         {showTranscript && (
           <div className="card-subtle stack-sm">
-            {sentences.map((s, i) => {
+            {allSentences.map((s, i) => {
               const active = speakingSentenceId === s.id;
+              const isFlagged = flaggedSet.has(s.id);
               return (
                 <div
                   key={s.id}
                   className={active ? 'evidence-highlight' : ''}
-                  style={{ fontSize: '0.88rem', padding: '6px 8px', cursor: 'pointer' }}
-                  onClick={() => playSingleSentence(s)}
+                  style={{ fontSize: '0.88rem', padding: '6px 8px' }}
                 >
-                  <strong>Câu {i + 1}:</strong> {s.en}
-                  {s.vi && (
-                    <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>{s.vi}</div>
+                  <div className="flex-between flex-wrap" style={{ gap: 6 }}>
+                    <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => playSingleSentence(s)}>
+                      <strong>Câu {i + 1}:</strong> {s.en}
+                    </div>
+                    <div className="flex-row" style={{ gap: 4 }}>
+                      <button
+                        className="btn btn-sm btn-icon"
+                        style={{ width: 28, height: 28 }}
+                        title="Nghe lại câu này"
+                        onClick={() => playSingleSentence(s)}
+                      >
+                        <Volume2 size={13} />
+                      </button>
+                      <button
+                        className={`btn btn-sm btn-icon ${isFlagged ? 'btn-soft' : ''}`}
+                        style={{ width: 28, height: 28 }}
+                        title={isFlagged ? 'Bỏ đánh dấu xem lại' : 'Đánh dấu câu cần xem lại'}
+                        onClick={() => toggleListeningFlag(lesson.id, s.id)}
+                      >
+                        <Flag size={13} />
+                      </button>
+                    </div>
+                  </div>
+                  {showViTranslation && s.vi && (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginTop: 2 }}>
+                      {s.vi}
+                    </div>
                   )}
                 </div>
               );
@@ -290,7 +406,7 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
             className={subMode === 'dictation' ? 'active' : ''}
             onClick={() => setSubMode('dictation')}
           >
-            Chép chính tả từng câu ({completedSentIds.length}/{sentences.length})
+            Chép chính tả từng câu ({completedSentIds.length}/{allSentences.length})
           </button>
           <button
             className={subMode === 'gapfill' ? 'active' : ''}
@@ -317,38 +433,70 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
         </button>
       </div>
 
-      {/* Mode 1: Sentence-by-Sentence Dictation with First-Mismatch Highlight */}
+      {/* Mode 1: Sentence-by-Sentence Dictation with Quick Replay, Flagging & Quick Save */}
       {subMode === 'dictation' && activeSentence && (
         <div className="card stack-md">
           <div className="flex-between flex-wrap">
             <div className="chip-list">
-              {sentences.map((s, i) => (
+              {visibleSentences.map((s, i) => (
                 <button
                   key={s.id}
-                  className={`chip ${sentIdx === i ? 'active' : ''}`}
-                  onClick={() => {
-                    setSentIdx(i);
-                    setDictInput('');
-                    setDictEval(null);
-                    setShowDictAnswer(false);
-                  }}
+                  className={`chip ${safeSentIdx === i ? 'active' : ''}`}
+                  onClick={() => switchSentence(i)}
                 >
-                  Câu {i + 1} {completedSentIds.includes(s.id) ? '✓' : ''}
+                  Câu {i + 1} {flaggedSet.has(s.id) ? '⚑' : ''}
+                  {completedSentIds.includes(s.id) ? ' ✓' : ''}
                 </button>
               ))}
+              {flaggedIds.length > 0 && (
+                <button
+                  className={`chip ${onlyFlagged ? 'active' : ''}`}
+                  onClick={() => {
+                    setOnlyFlagged((v) => !v);
+                    setSentIdx(0);
+                  }}
+                >
+                  <Flag size={12} /> Chỉ câu đánh dấu ({flaggedIds.length})
+                </button>
+              )}
             </div>
 
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => playSingleSentence(activeSentence)}
-            >
-              <Volume2 size={15} /> Nghe câu {sentIdx + 1}
-            </button>
+            {/* Quick Short-Segment Replay & Flag Controls */}
+            <div className="flex-row flex-wrap" style={{ gap: 6 }}>
+              <button
+                className="btn btn-sm"
+                disabled={safeSentIdx === 0}
+                onClick={() => switchSentence(safeSentIdx - 1)}
+                title="Lùi về câu trước"
+              >
+                <SkipBack size={14} /> Câu trước
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => playSingleSentence(activeSentence)}
+                title="Nghe lại nhanh (Alt+R)"
+              >
+                <Volume2 size={15} /> Nghe lại câu {safeSentIdx + 1}
+              </button>
+              <button
+                className="btn btn-sm"
+                onClick={() => playSingleSentence(activeSentence, 0.75)}
+              >
+                0.75x Chậm
+              </button>
+              <button
+                className={`btn btn-sm ${flaggedSet.has(activeSentence.id) ? 'btn-soft' : ''}`}
+                onClick={() => toggleListeningFlag(lesson.id, activeSentence.id)}
+              >
+                <Flag size={13} />{' '}
+                {flaggedSet.has(activeSentence.id) ? 'Đã đánh dấu' : 'Đánh dấu xem lại'}
+              </button>
+            </div>
           </div>
 
           <div className="stack-sm">
             <label style={{ fontSize: '0.84rem', fontWeight: 600 }}>
-              Gõ lại chính xác câu bạn vừa nghe (đối chiếu từng từ & làm nổi bật từ sai đầu tiên):
+              Gõ lại chính xác câu bạn vừa nghe (Enter để kiểm tra · Alt+R để nghe lại nhanh):
             </label>
             <textarea
               className="textarea"
@@ -357,7 +505,10 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
               value={dictInput}
               onChange={(e) => setDictInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.altKey && e.key.toLowerCase() === 'r') {
+                  e.preventDefault();
+                  playSingleSentence(activeSentence);
+                } else if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleCheckDictation();
                 }
@@ -367,30 +518,62 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
               <button className="btn btn-primary" onClick={handleCheckDictation}>
                 Kiểm tra (Enter)
               </button>
-              <button
-                className="btn"
-                onClick={() => playSingleSentence(activeSentence, Math.max(0.72, speed - 0.15))}
-              >
-                Nghe chậm hơn
-              </button>
               <button className="btn" onClick={() => setShowDictAnswer((v) => !v)}>
                 <Eye size={14} /> {showDictAnswer ? 'Ẩn đáp án' : 'Xem đáp án'}
               </button>
-              {sentIdx + 1 < sentences.length && (
+              <button
+                className="btn btn-sm"
+                onClick={() => setQuickSaveOpen((v) => !v)}
+              >
+                <BookmarkPlus size={14} /> Lưu từ/cụm sang Flashcard & SRS
+              </button>
+              {safeSentIdx + 1 < visibleSentences.length && (
                 <button
                   className="btn btn-soft"
-                  onClick={() => {
-                    setSentIdx((i) => i + 1);
-                    setDictInput('');
-                    setDictEval(null);
-                    setShowDictAnswer(false);
-                  }}
+                  onClick={() => switchSentence(safeSentIdx + 1)}
                 >
                   Câu tiếp →
                 </button>
               )}
             </div>
           </div>
+
+          {/* Inline Quick-Save from Listening Sentence */}
+          {quickSaveOpen && (
+            <form className="card-subtle stack-sm" onSubmit={handleQuickSaveFromSentence}>
+              <strong style={{ fontSize: '0.82rem' }}>
+                Lưu nhanh từ/cụm từ (tự động gắn câu nghe hiện tại làm ví dụ Anh–Việt):
+              </strong>
+              <div className="grid-2" style={{ gap: 8 }}>
+                <input
+                  className="input"
+                  required
+                  placeholder="Từ / cụm từ tiếng Anh cần lưu..."
+                  value={quickTerm}
+                  onChange={(e) => setQuickTerm(e.target.value)}
+                />
+                <input
+                  className="input"
+                  required
+                  placeholder="Nghĩa tiếng Việt..."
+                  value={quickMeaning}
+                  onChange={(e) => setQuickMeaning(e.target.value)}
+                />
+              </div>
+              <div className="flex-row">
+                <button type="submit" className="btn btn-sm btn-primary">
+                  Lưu vào Flashcard & SRS
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => setQuickSaveOpen(false)}
+                >
+                  Hủy
+                </button>
+              </div>
+            </form>
+          )}
 
           {dictEval && (
             <div className="stack-sm">
@@ -450,19 +633,27 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
           )}
 
           {showDictAnswer && (
-            <div className="card-subtle">
+            <div className="card-subtle stack-sm">
               <div style={{ fontWeight: 600 }}>{activeSentence.en}</div>
-              {activeSentence.vi && (
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: 4 }}>
+              {showViTranslation && activeSentence.vi ? (
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                   {activeSentence.vi}
                 </div>
-              )}
+              ) : activeSentence.vi ? (
+                <button
+                  className="btn btn-sm"
+                  style={{ alignSelf: 'flex-start' }}
+                  onClick={() => setShowViTranslation(true)}
+                >
+                  <Eye size={13} /> Hiện nghĩa tiếng Việt
+                </button>
+              ) : null}
             </div>
           )}
         </div>
       )}
 
-      {/* Mode 2: Gap-Fill */}
+      {/* Mode 2: Gap-Fill + 1-Click Save to Flashcard & SRS */}
       {subMode === 'gapfill' && (
         <div className="card stack-md">
           {listening.gapFill.length === 0 ? (
@@ -471,12 +662,42 @@ export const ListeningTab: React.FC<ListeningTabProps> = ({ lesson }) => {
             <>
               {listening.gapFill.map((g, i) => {
                 const ok = normalizeWord(gapAnswers[g.id] || '') === normalizeWord(g.answer);
+                const filledSentence = g.sentence.replace(/_{2,}|\[\.\.\.\]/g, g.answer);
+                const matchedVi =
+                  allSentences.find((s) =>
+                    s.en.toLowerCase().includes(g.answer.toLowerCase())
+                  )?.vi || '';
                 return (
                   <div key={g.id} className="card-subtle stack-sm">
-                    <div style={{ fontWeight: 600 }}>
-                      {i + 1}. {g.sentence}
+                    <div className="flex-between flex-wrap" style={{ gap: 6 }}>
+                      <div style={{ fontWeight: 600 }}>
+                        {i + 1}. {g.sentence}
+                      </div>
+                      <button
+                        className="btn btn-sm"
+                        title="Lưu từ khóa Gap-Fill kèm câu gốc vào Flashcard bài học & SRS"
+                        onClick={() =>
+                          addLessonVocab(
+                            lesson.id,
+                            {
+                              termKey: '',
+                              term: g.answer,
+                              ipa: '',
+                              pos: 'listening keyword',
+                              wordRoot: '',
+                              meaningVi: g.hint || 'Thuật ngữ bài nghe',
+                              noteVi: `Gap-Fill bài nghe: ${listening.title}`,
+                              exampleEn: filledSentence,
+                              exampleVi: matchedVi,
+                            },
+                            true
+                          )
+                        }
+                      >
+                        <BookmarkPlus size={13} /> Lưu Flashcard & SRS
+                      </button>
                     </div>
-                    {g.hint && (
+                    {showViTranslation && g.hint && (
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                         Gợi ý nghĩa: {g.hint}
                       </span>

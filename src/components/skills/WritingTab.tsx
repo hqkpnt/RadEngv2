@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Clock, Eye, Play, RotateCcw } from 'lucide-react';
+import { BookmarkPlus, CheckCircle2, Clock, Eye, Play, RotateCcw } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { LessonPack } from '../../types/schema';
 
@@ -8,25 +8,34 @@ interface WritingTabProps {
 }
 
 const RUBRIC_CRITERIA = [
-  'Clinical Accuracy & Task Response (Đủ ý trọng tâm & chuẩn xác chuyên môn CĐHA/DSA)',
-  'Coherence & Cohesion (Mạch lạc, liên kết tiến trình thủ thuật tự nhiên)',
-  'Lexical Resource (Thuật ngữ hình ảnh & can thiệp nội mạch chính xác)',
-  'Grammatical Range & Accuracy (Chuẩn bị động quá khứ & mệnh đề phân từ)',
+  'Bám đề & Độ chính xác chuyên môn (Đủ ý trọng tâm, chuẩn xác CĐHA/DSA)',
+  'Độ mạch lạc & Liên kết (Trình tự logic, từ nối tự nhiên)',
+  'Từ vựng & Thuật ngữ chuyên ngành (Dùng đúng collocation, tránh lặp từ)',
+  'Cấu trúc ngữ pháp (Chuẩn bị động quá khứ, mệnh đề phân từ, ít lỗi)',
 ];
 
 export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
-  const { state, saveWritingDraft, toggleParaphraseDone, markSkillComplete, showToast } = useApp();
+  const {
+    state,
+    saveWritingDraft,
+    saveParaphraseDraft,
+    toggleWritingRubric,
+    toggleParaphraseDone,
+    addLessonVocab,
+    markSkillComplete,
+    showToast,
+  } = useApp();
   const { writing } = lesson;
 
   const progress = state.lessonProgress[lesson.id];
   const draft = progress?.writingDraft || '';
+  const paraphraseDrafts = progress?.writingParaphraseDrafts || {};
+  const rubricChecked = progress?.writingRubric || {};
   const doneIds = progress?.paraphraseDoneIds || [];
 
   const [section, setSection] = useState<'paraphrase' | 'essay'>('paraphrase');
-  const [userSentences, setUserSentences] = useState<Record<string, string>>({});
   const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({});
   const [activeBand, setActiveBand] = useState<'band7' | 'band8' | 'band9'>('band8');
-  const [rubricChecked, setRubricChecked] = useState<Record<number, boolean>>({});
 
   const [timerRunning, setTimerRunning] = useState(false);
   const [secLeft, setSecLeft] = useState(writing.essayTask.recommendedMinutes * 60);
@@ -47,6 +56,7 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
     return trimmed ? trimmed.split(/\s+/).length : 0;
   }, [draft]);
 
+  const rubricScore = RUBRIC_CRITERIA.filter((_, i) => Boolean(rubricChecked[i])).length;
   const mins = String(Math.floor(secLeft / 60)).padStart(2, '0');
   const secs = String(secLeft % 60).padStart(2, '0');
 
@@ -87,6 +97,7 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
             writing.paraphraseTasks.map((task, idx) => {
               const isDone = doneIds.includes(task.id);
               const isShown = Boolean(revealedIds[task.id]);
+              const savedVal = paraphraseDrafts[task.id] || '';
               return (
                 <div key={task.id} className="card stack-sm">
                   <div className="flex-between flex-wrap">
@@ -95,6 +106,11 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
                       <span className="badge">
                         {task.type === 'paraphrase' ? 'Paraphrase' : 'Translation Việt → Anh'}
                       </span>
+                      {savedVal.trim() && (
+                        <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>
+                          Đã lưu nháp
+                        </span>
+                      )}
                     </div>
                     <button
                       className={`btn btn-sm ${isDone ? 'btn-success' : ''}`}
@@ -108,7 +124,9 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
 
                   {task.targetKeywords.length > 0 && (
                     <div className="flex-row flex-wrap" style={{ gap: 6 }}>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Từ khóa gợi ý:</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        Từ khóa gợi ý:
+                      </span>
                       {task.targetKeywords.map((kw) => (
                         <span key={kw} className="badge mono" style={{ fontSize: '0.76rem' }}>
                           {kw}
@@ -120,14 +138,12 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
                   <textarea
                     className="textarea"
                     style={{ minHeight: 70 }}
-                    placeholder="Viết câu tiếng Anh chuyên ngành của bạn tại đây..."
-                    value={userSentences[task.id] || ''}
-                    onChange={(e) =>
-                      setUserSentences((prev) => ({ ...prev, [task.id]: e.target.value }))
-                    }
+                    placeholder="Viết câu tiếng Anh chuyên ngành của bạn (tự động lưu nháp)..."
+                    value={savedVal}
+                    onChange={(e) => saveParaphraseDraft(lesson.id, task.id, e.target.value)}
                   />
 
-                  <div className="flex-row">
+                  <div className="flex-row flex-wrap">
                     <button
                       className="btn btn-sm btn-soft"
                       onClick={() =>
@@ -136,11 +152,45 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
                     >
                       <Eye size={14} /> {isShown ? 'Ẩn câu mẫu' : 'So sánh đáp án mẫu'}
                     </button>
+
+                    {task.modelAnswer && (
+                      <button
+                        className="btn btn-sm"
+                        title="Lưu cấu trúc / từ khóa kèm câu mẫu vào Flashcard bài học & SRS"
+                        onClick={() =>
+                          addLessonVocab(
+                            lesson.id,
+                            {
+                              termKey: '',
+                              term:
+                                task.targetKeywords.length > 0
+                                  ? task.targetKeywords.join(' · ')
+                                  : task.modelAnswer.slice(0, 70),
+                              ipa: '',
+                              pos: 'writing phrase',
+                              wordRoot: '',
+                              meaningVi: task.prompt,
+                              noteVi: task.noteVi || 'Trích từ bài luyện Writing Paraphrase',
+                              exampleEn: task.modelAnswer,
+                              exampleVi: task.type === 'translation' ? task.prompt : task.noteVi,
+                            },
+                            true
+                          )
+                        }
+                      >
+                        <BookmarkPlus size={14} /> Lưu Flashcard & SRS
+                      </button>
+                    )}
                   </div>
 
                   {isShown && (
-                    <div className="card-subtle stack-sm" style={{ borderLeft: '3px solid var(--success)' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--success)' }}>{task.modelAnswer}</div>
+                    <div
+                      className="card-subtle stack-sm"
+                      style={{ borderLeft: '3px solid var(--success)' }}
+                    >
+                      <div style={{ fontWeight: 600, color: 'var(--success)' }}>
+                        {task.modelAnswer}
+                      </div>
                       {task.noteVi && (
                         <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
                           💡 {task.noteVi}
@@ -187,7 +237,7 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
             <div className="stack-sm">
               <div className="flex-between">
                 <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                  Bản nháp tự động lưu an toàn trên trình duyệt
+                  Bản nháp tự động lưu an toàn (không mất khi đổi tab / tải lại)
                 </span>
                 <span
                   className={`badge mono ${
@@ -207,7 +257,12 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
             </div>
 
             <div className="card-subtle stack-sm">
-              <strong style={{ fontSize: '0.84rem' }}>Bảng tự kiểm tra 4 tiêu chí (25% mỗi tiêu chí)</strong>
+              <div className="flex-between">
+                <strong style={{ fontSize: '0.84rem' }}>Checklist tự đánh giá Writing</strong>
+                <span className={`badge ${rubricScore === 4 ? 'badge-success' : 'badge-accent'}`}>
+                  {rubricScore}/4 tiêu chí
+                </span>
+              </div>
               {RUBRIC_CRITERIA.map((crit, idx) => (
                 <label
                   key={idx}
@@ -218,9 +273,7 @@ export const WritingTab: React.FC<WritingTabProps> = ({ lesson }) => {
                     type="checkbox"
                     style={{ marginTop: 4 }}
                     checked={Boolean(rubricChecked[idx])}
-                    onChange={(e) =>
-                      setRubricChecked((p) => ({ ...p, [idx]: e.target.checked }))
-                    }
+                    onChange={() => toggleWritingRubric(lesson.id, idx)}
                   />
                   <span>{crit}</span>
                 </label>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, RotateCcw, Sparkles, Volume2 } from 'lucide-react';
+import { BookmarkPlus, CheckCircle2, Clock, RotateCcw, Sparkles, Volume2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { LessonPack } from '../../types/schema';
 import { normalizeWord, speakText } from '../../utils/speech';
@@ -10,7 +10,7 @@ interface GrammarTabProps {
 }
 
 export const GrammarTab: React.FC<GrammarTabProps> = ({ lesson, timedMode }) => {
-  const { prefs, markSkillComplete, showToast } = useApp();
+  const { prefs, addLessonVocab, markSkillComplete, showToast } = useApp();
   const points = lesson.grammar;
   const [activePointIdx, setActivePointIdx] = useState(0);
   // Strictly scoped by lessonId + grammarIndex + grammarId + exerciseIndex + exerciseId
@@ -142,21 +142,46 @@ export const GrammarTab: React.FC<GrammarTabProps> = ({ lesson, timedMode }) => 
 
           {point.sourceSentence.en && (
             <div className="card-subtle stack-sm">
-              <div className="flex-between">
+              <div className="flex-between flex-wrap">
                 <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                   CÂU NGUỒN TRONG NGỮ CẢNH THỰC TẾ
                 </span>
-                <button
-                  className="btn btn-sm btn-soft"
-                  onClick={() =>
-                    speakText(point.sourceSentence.en, prefs.ttsRate, prefs.ttsVoice, {
-                      voiceName: prefs.ttsVoiceName,
-                      style: prefs.narrationStyle,
-                    })
-                  }
-                >
-                  <Volume2 size={14} /> Nghe câu mẫu
-                </button>
+                <div className="flex-row flex-wrap" style={{ gap: 6 }}>
+                  <button
+                    className="btn btn-sm btn-soft"
+                    onClick={() =>
+                      speakText(point.sourceSentence.en, prefs.ttsRate, prefs.ttsVoice, {
+                        voiceName: prefs.ttsVoiceName,
+                        style: prefs.narrationStyle,
+                      })
+                    }
+                  >
+                    <Volume2 size={14} /> Nghe câu mẫu
+                  </button>
+                  <button
+                    className="btn btn-sm"
+                    title="Lưu cấu trúc ngữ pháp kèm câu nguồn vào Flashcard bài học & SRS"
+                    onClick={() =>
+                      addLessonVocab(
+                        lesson.id,
+                        {
+                          termKey: '',
+                          term: point.topic,
+                          ipa: '',
+                          pos: 'grammar',
+                          wordRoot: point.formula,
+                          meaningVi: point.explanationVi || point.formula || point.topic,
+                          noteVi: point.formula ? `Công thức: ${point.formula}` : '',
+                          exampleEn: point.sourceSentence.en,
+                          exampleVi: point.sourceSentence.vi,
+                        },
+                        true
+                      )
+                    }
+                  >
+                    <BookmarkPlus size={14} /> Lưu Flashcard & SRS
+                  </button>
+                </div>
               </div>
               <div style={{ fontWeight: 600, fontSize: '0.98rem' }}>{point.sourceSentence.en}</div>
               {point.sourceSentence.vi && (

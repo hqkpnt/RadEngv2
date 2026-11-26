@@ -72,6 +72,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
   const [typedAnswer, setTypedAnswer] = useState('');
   const [revealed, setRevealed] = useState(false);
   const [hintShown, setHintShown] = useState(false);
+  const [hideMeaningDuringRecall, setHideMeaningDuringRecall] = useState(false);
 
   const now = Date.now();
 
@@ -253,7 +254,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
     return (
       <div className="stack-md" style={{ maxWidth: 740, margin: '0 auto' }}>
         <div className="card flex-between flex-wrap">
-          <div className="flex-row">
+          <div className="flex-row flex-wrap">
             <span className="badge badge-accent">
               Đang ôn · Thẻ {sessionIdx + 1} / {sessionQueue.length}
             </span>
@@ -263,8 +264,34 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
             >
               <Volume2 size={14} /> Tự đọc: {srs.autoSpeak ? 'bật' : 'tắt'}
             </button>
+            <button
+              className={`btn btn-sm ${activeSessionCard.starred ? 'btn-soft' : ''}`}
+              title="Đánh dấu thẻ cần xem lại"
+              onClick={() =>
+                updateSrsCard(activeSessionCard.id, { starred: !activeSessionCard.starred })
+              }
+            >
+              <Star
+                size={14}
+                fill={activeSessionCard.starred ? '#f59e0b' : 'none'}
+                style={{ color: activeSessionCard.starred ? '#f59e0b' : 'currentColor' }}
+              />
+              {activeSessionCard.starred ? 'Đã đánh dấu' : 'Xem lại'}
+            </button>
           </div>
-          <div className="flex-row">
+          <div className="flex-row flex-wrap">
+            <button
+              className="btn btn-sm"
+              onClick={() =>
+                speakText(activeSessionCard.front, 0.78, prefs.ttsVoice, {
+                  voiceName: prefs.ttsVoiceName,
+                  style: prefs.narrationStyle,
+                })
+              }
+              title="Nghe chậm 0.78x"
+            >
+              0.78x Chậm
+            </button>
             <select
               className="select"
               style={{ width: 170, padding: '5px 8px', fontSize: '0.82rem' }}
@@ -397,8 +424,20 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                   Lật thẻ (Space)
                 </button>
               ) : (
-                <div className="card-subtle" style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: '1.15rem', fontWeight: 600 }}>{activeSessionCard.meaning}</div>
+                <div className="card-subtle stack-sm" style={{ marginTop: 10 }}>
+                  <div className="flex-row" style={{ justifyContent: 'center' }}>
+                    <button
+                      className="btn btn-sm"
+                      onClick={() => setHideMeaningDuringRecall((v) => !v)}
+                    >
+                      {hideMeaningDuringRecall ? 'Hiện nghĩa tiếng Việt' : 'Ẩn nghĩa tiếng Việt'}
+                    </button>
+                  </div>
+                  {!hideMeaningDuringRecall && (
+                    <div style={{ fontSize: '1.15rem', fontWeight: 600 }}>
+                      {activeSessionCard.meaning}
+                    </div>
+                  )}
                   {activeSessionCard.wordRoot && (
                     <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
                       Gốc từ: {activeSessionCard.wordRoot}

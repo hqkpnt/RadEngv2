@@ -274,6 +274,11 @@ export interface LessonProgress {
   skillsCompleted: Record<SkillKey, boolean>;
   stars: number;
   writingDraft: string;
+  writingParaphraseDrafts?: Record<string, string>;
+  writingRubric?: Record<number, boolean>;
+  speakingNotes?: Record<string, string>;
+  speakingRubric?: Record<number, boolean>;
+  listeningFlaggedIds?: string[];
   paraphraseDoneIds: string[];
   lastOpenedAt: number;
 }
