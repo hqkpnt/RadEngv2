@@ -75,6 +75,7 @@ interface AppContextValue {
   toggleParaphraseDone: (lessonId: string, taskId: string) => void;
   saveNotebook: (lessonId: string, content: string) => void;
   addLessonVocab: (lessonId: string, item: VocabItem, alsoAddToSrs?: boolean) => void;
+  bulkAddLessonVocab: (lessonId: string, items: VocabItem[], alsoAddToSrs?: boolean) => number;
   removeLessonVocab: (lessonId: string, termKey: string) => void;
   toggleMastered: (lesson: LessonPack, item: VocabItem) => void;
   removeMastered: (termKey: string) => void;
@@ -606,6 +607,132 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     },
     [mutateState, addCardToSrs, showToast]
+  );
+
+  const bulkAddLessonVocab = useCallback(
+    (lessonId: string, items: VocabItem[], alsoAddToSrs = false): number => {
+      const now = Date.now();
+      const cleanedList: VocabItem[] = [];
+      const seenBatch = new Set<string>();
+
+      items.forEach((item, idx) => {
+        const cleanTerm = sanitizePlainText(item.term, 200).trim();
+        const cleanMeaning = sanitizePlainText(item.meaningVi, 400).trim();
+        if (!cleanTerm || !cleanMeaning) return;
+        const lower = cleanTerm.toLowerCase();
+        if (seenBatch.has(lower)) return;
+        seenBatch.add(lower);
+
+        cleanedList.push({
+          termKey:
+            sanitizePlainText(item.termKey, 100).trim() ||
+            `custom_${slugifyKey(cleanTerm)}_${(now + idx).toString(36).slice(-4)}`,
+          term: cleanTerm,
+          ipa: sanitizePlainText(item.ipa, 120).trim(),
+          pos: sanitizePlainText(item.pos || 'term', 40).trim(),
+          wordRoot: sanitizePlainText(item.wordRoot, 250).trim(),
+          meaningVi: cleanMeaning,
+          noteVi: sanitizePlainText(item.noteVi, 500).trim(),
+          exampleEn: sanitizePlainText(item.exampleEn, 600).trim(),
+          exampleVi: sanitizePlainText(item.exampleVi, 600).trim(),
+          isCustom: true,
+        });
+      });
+
+      if (cleanedList.length === 0) return 0;
+
+      const currentSnap = latestStateRef.current;
+      const existingCustomSnap = currentSnap.customVocabByLesson[lessonId] || [];
+      const existingTermSetSnap = new Set(
+        existingCustomSnap.map((v) => v.term.trim().toLowerCase())
+      );
+      const toInsertLesson = cleanedList.filter(
+        (v) => !existingTermSetSnap.has(v.term.toLowerCase())
+      );
+      const addedLessonCount = toInsertLesson.length;
+
+      let addedSrsCount = 0;
+      if (alsoAddToSrs && addedLessonCount > 0) {
+        const existingSrsSnap = new Set(
+          currentSnap.srs.cards.map((c) => c.front.trim().toLowerCase())
+        );
+        toInsertLesson.forEach((v) => {
+          if (!existingSrsSnap.has(v.term.toLowerCase())) {
+            existingSrsSnap.add(v.term.toLowerCase());
+            addedSrsCount += 1;
+          }
+        });
+      }
+
+      if (addedLessonCount === 0) {
+        showToast('Các thuật ngữ này đã có sẵn trong danh sách tự thêm của bài học.');
+        return 0;
+      }
+
+      mutateState((prev) => {
+        const existingCustom = prev.customVocabByLesson[lessonId] || [];
+        const existingTermSet = new Set(existingCustom.map((v) => v.term.trim().toLowerCase()));
+        const freshLessonCards = cleanedList.filter(
+          (v) => !existingTermSet.has(v.term.toLowerCase())
+        );
+        if (freshLessonCards.length === 0) return prev;
+
+        let nextSrsCards = prev.srs.cards;
+        if (alsoAddToSrs) {
+          const existingSrsFronts = new Set(
+            prev.srs.cards.map((c) => c.front.trim().toLowerCase())
+          );
+          const newSrs: SrsCard[] = [];
+          freshLessonCards.forEach((v, i) => {
+            if (existingSrsFronts.has(v.term.toLowerCase())) return;
+            existingSrsFronts.add(v.term.toLowerCase());
+            newSrs.push({
+              id: `card_${now}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+              termKey: v.termKey,
+              front: v.term,
+              meaning: v.meaningVi,
+              ipa: v.ipa,
+              wordRoot: v.wordRoot || undefined,
+              source: 'lesson',
+              lessonId,
+              folderId: null,
+              starred: false,
+              orderIndex: prev.srs.cards.length + i,
+              status: 'learning',
+              dueAt: now + 60 * 1000,
+              intervalSeconds: 60,
+              easeFactor: 2.5,
+              repetitions: 0,
+              createdAt: now,
+            });
+          });
+          if (newSrs.length > 0) {
+            nextSrsCards = [...newSrs, ...prev.srs.cards];
+          }
+        }
+
+        return {
+          ...prev,
+          customVocabByLesson: {
+            ...prev.customVocabByLesson,
+            [lessonId]: [...freshLessonCards, ...existingCustom],
+          },
+          srs: {
+            ...prev.srs,
+            cards: nextSrsCards,
+          },
+        };
+      });
+
+      showToast(
+        alsoAddToSrs && addedSrsCount > 0
+          ? `Đã thêm ${addedLessonCount} thẻ vào bài học & ${addedSrsCount} thẻ vào hàng SRS!`
+          : `Đã thêm ${addedLessonCount} thẻ mới vào bài học!`
+      );
+
+      return addedLessonCount;
+    },
+    [mutateState, showToast]
   );
 
   const removeLessonVocab = useCallback(
@@ -1158,6 +1285,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         toggleParaphraseDone,
         saveNotebook,
         addLessonVocab,
+        bulkAddLessonVocab,
         removeLessonVocab,
         toggleMastered,
         removeMastered,

@@ -1,0 +1,631 @@
+{
+  "schemaVersion": 2,
+  "id": "rad-c_ha_cap_cuu-ngay-1-nhap-mon-tai-bien-thuoc-can-quang",
+  "meta": {
+    "title": "Day 1: Introduction & Adverse Reactions to Contrast Media",
+    "titleVi": "Ngày 1: Nhập môn & Tai biến thuốc cản quang",
+    "level": "C1",
+    "subspecialty": "c_ha_cap_cuu",
+    "sourceBook": "On Call Radiology (Ngày 1: Nhập môn & Tai biến thuốc cản quang)",
+    "tags": [
+      "CT",
+      "Contrast Media",
+      "Anaphylaxis",
+      "CIN",
+      "Extravasation"
+    ],
+    "estimatedMinutes": 45,
+    "createdAt": "2026-11-26"
+  },
+  "vocabulary": [
+    {
+      "termKey": "adverse_reaction",
+      "term": "adverse reaction",
+      "ipa": "/ˈæd.vɜːs riˈæk.ʃən/",
+      "pos": "noun phrase",
+      "wordRoot": "ad- (về phía) + vertere (quay, chống lại) + re- (lại) + agere (hành động)",
+      "meaningVi": "phản ứng bất lợi / tai biến",
+      "noteVi": "Trong CĐHA cấp cứu, các phản ứng cấp tính (immediate, acute reactions) với thuốc cản quang tĩnh mạch (IV contrast) quan trọng hơn các phản ứng muộn; tỷ lệ tử vong hiếm gặp khoảng 1/170.000 ca.",
+      "exampleEn": "While reactions to intravenous contrast media can be delayed, it is the immediate, acute adverse reaction that is most relevant to the on-call radiologist.",
+      "exampleVi": "Mặc dù các phản ứng với thuốc cản quang đường tĩnh mạch có thể xuất hiện muộn, nhưng phản ứng bất lợi cấp tính tức thì mới là vấn đề thiết yếu nhất đối với bác sĩ CĐHA trực cấp cứu."
+    },
+    {
+      "termKey": "contrast_induced_nephropathy",
+      "term": "contrast-induced nephropathy",
+      "ipa": "/ˈkɒn.trɑːst ɪnˈdjuːst nəˈfrɒp.ə.θi/",
+      "pos": "noun phrase",
+      "wordRoot": "contra- (đối lập) + nephro- (thận, gốc Hy Lạp nephros) + -pathy (bệnh lý, gốc Hy Lạp pathos)",
+      "meaningVi": "bệnh thận do thuốc cản quang (CIN)",
+      "noteVi": "Là sự suy giảm chức năng thận sau khi tiêm thuốc cản quang. Ngưỡng eGFR < 60 ml/phút gợi ý suy giảm chức năng thận; bệnh nhân nguy cơ cần được bù dịch trước chụp (pre-hydration) và theo dõi chức năng thận ít nhất 72 giờ sau chụp.",
+      "exampleEn": "Patients at increased risk of developing contrast-induced nephropathy should undergo regular renal function monitoring for at least 72 hours following imaging.",
+      "exampleVi": "Những bệnh nhân có nguy cơ cao phát triển bệnh thận do thuốc cản quang cần được theo dõi chức năng thận định kỳ ít nhất 72 giờ sau khi chụp hình ảnh."
+    },
+    {
+      "termKey": "anaphylactic_reaction",
+      "term": "anaphylactic reaction",
+      "ipa": "/ˌæn.ə.fɪˈlæk.tɪk riˈæk.ʃən/",
+      "pos": "noun phrase",
+      "wordRoot": "ana- (ngược lại) + phylaxis (sự bảo vệ, gốc Hy Lạp phylassein)",
+      "meaningVi": "phản ứng phản vệ",
+      "noteVi": "Biến chứng đe dọa tính mạng nghiêm trọng nhất của thuốc cản quang, biểu hiện co thắt phế quản, phù thanh quản, tụt huyết áp dẫn đến ngừng tim phổi; xử trí khẩn cấp bằng oxy, thuốc đồng vận beta-2 hoặc adrenaline 1:1000 tiêm bắp (0.1–0.3 ml).",
+      "exampleEn": "An anaphylactic reaction is the most serious and life-threatening complication of contrast administration and requires immediate recognition and treatment.",
+      "exampleVi": "Phản ứng phản vệ là biến chứng nghiêm trọng và đe dọa tính mạng nhất của việc sử dụng thuốc cản quang, đòi hỏi phải nhận diện và xử trí ngay lập tức."
+    },
+    {
+      "termKey": "contrast_extravasation",
+      "term": "contrast extravasation",
+      "ipa": "/ˈkɒn.trɑːst ɪkˌstræv.əˈzeɪ.ʃən/",
+      "pos": "noun phrase",
+      "wordRoot": "extra- (bên ngoài) + vas (mạch máu, gốc Latinh) + -ation (quá trình)",
+      "meaningVi": "thoát mạch thuốc cản quang",
+      "noteVi": "Xảy ra vào mô dưới da khi tiêm tay hoặc bơm tiêm điện, gây ban đỏ, sưng và đau. Đa số tự giới hạn (chườm đá, kê cao chi), nhưng hiếm gặp có thể gây hội chứng chèn ép khoang hoặc hoại tử da cần hội chẩn ngoại khoa/phẫu thuật tạo hình.",
+      "exampleEn": "Contrast extravasation usually occurs into the subcutaneous tissues during pump injections and may rarely progress to compartment syndrome or skin necrosis.",
+      "exampleVi": "Thoát mạch thuốc cản quang thường xảy ra vào mô dưới da trong quá trình tiêm bằng bơm áp lực và hiếm khi có thể tiến triển thành hội chứng chèn ép khoang hoặc hoại tử da."
+    },
+    {
+      "termKey": "bronchospasm",
+      "term": "bronchospasm",
+      "ipa": "/ˈbrɒŋ.kəʊˌspæz.əm/",
+      "pos": "noun",
+      "wordRoot": "bronkho- (phế quản, gốc Hy Lạp bronkhos) + spasmos (sự co thắt)",
+      "meaningVi": "co thắt phế quản",
+      "noteVi": "Triệu chứng hô hấp điển hình của phản vệ thuốc cản quang. Mức độ nhẹ điều trị bằng oxy qua mặt nạ (6–10 lít/phút) và thuốc xịt đồng vận beta-2 (2–3 nhát); nếu không đáp ứng cần tiêm bắp adrenaline 1:1000.",
+      "exampleEn": "Mild bronchospasm induced by intravenous contrast can be treated with high-flow oxygen by mask and two to three puffs of a beta-2 agonist inhaler.",
+      "exampleVi": "Co thắt phế quản mức độ nhẹ do thuốc cản quang tĩnh mạch có thể được điều trị bằng thở oxy qua mặt nạ và hai đến ba nhát xịt thuốc đồng vận beta-2."
+    },
+    {
+      "termKey": "laryngeal_oedema",
+      "term": "laryngeal oedema",
+      "ipa": "/ˌlær.ɪnˈdʒiː.əl ɪˈdiː.mə/",
+      "pos": "noun phrase",
+      "wordRoot": "laryng- (thanh quản, gốc Hy Lạp larynx) + oidema (sự sưng phù, gốc Hy Lạp)",
+      "meaningVi": "phù thanh quản",
+      "noteVi": "Dấu hiệu chỉ điểm phản vệ mức độ trung bình đến nặng, đòi hỏi tiêm bắp ngay adrenaline 1:1000 (0.1–0.3 ml) và kích hoạt đội hồi sức cấp cứu.",
+      "exampleEn": "In moderate anaphylactic reactions presenting with laryngeal oedema or refractory bronchospasm, intramuscular adrenaline 1:1000 may be required.",
+      "exampleVi": "Trong các phản ứng phản vệ mức độ trung bình có biểu hiện phù thanh quản hoặc co thắt phế quản kém đáp ứng, có thể cần tiêm bắp adrenaline 1:1000."
+    },
+    {
+      "termKey": "compartment_syndrome",
+      "term": "compartment syndrome",
+      "ipa": "/kəmˈpɑːt.mənt ˌsɪn.drəʊm/",
+      "pos": "noun phrase",
+      "wordRoot": "com- (cùng nhau) + partiri (chia phần) + syn- (cùng) + dromos (chạy, hội chứng)",
+      "meaningVi": "hội chứng chèn ép khoang",
+      "noteVi": "Biến chứng nặng hiếm gặp sau thoát mạch thuốc cản quang thể tích lớn; cần hội chẩn phẫu thuật ngay khi có dấu hiệu giảm tưới máu mô, phồng rộp/loét da hoặc rối loạn cảm giác.",
+      "exampleEn": "Patients with contrast extravasation who exhibit reduced tissue perfusion, skin blistering, or altered sensation must be urgently reviewed by the surgical team to rule out compartment syndrome.",
+      "exampleVi": "Những bệnh nhân bị thoát mạch thuốc cản quang có biểu hiện giảm tưới máu mô, phồng rộp da hoặc thay đổi cảm giác phải được đội ngũ ngoại khoa thăm khám khẩn để loại trừ hội chứng chèn ép khoang."
+    },
+    {
+      "termKey": "urticaria",
+      "term": "urticaria",
+      "ipa": "/ˌɜː.tɪˈkeə.ri.ə/",
+      "pos": "noun",
+      "wordRoot": "urtica (cây tầm ma gây ngứa, gốc Latinh) + -aria (tình trạng)",
+      "meaningVi": "mày đay / nổi mề đay",
+      "noteVi": "Biểu hiện da niêm phổ biến nhất của phản ứng toàn thân cấp tính nhẹ (tự giới hạn) hoặc phản vệ mức độ nhẹ (rải rác, kéo dài) — cân nhắc dùng thuốc kháng histamin đường uống, tiêm bắp hoặc tĩnh mạch.",
+      "exampleEn": "Scattered, protracted urticaria following contrast administration represents a mild anaphylactic reaction that warrants antihistamine therapy.",
+      "exampleVi": "Tình trạng nổi mày đay rải rác, kéo dài sau khi tiêm thuốc cản quang biểu hiện một phản ứng phản vệ nhẹ cần được điều trị bằng thuốc kháng histamin."
+    }
+  ],
+  "grammar": [
+    {
+      "id": "gp_1",
+      "topic": "Passive Modal Verbs for Clinical Recommendations & Protocols (Động từ khuyết thiếu bị động trong khuyến cáo lâm sàng)",
+      "formula": "Subject + should / may / must + be + Past Participle (V3/ed)",
+      "explanationVi": "Cấu trúc bị động với 'should', 'may', 'must' được sử dụng xuyên suốt trong y văn và tường trình CĐHA cấp cứu để đưa ra chỉ định xử trí khẩn cấp, quy trình hội chẩn hoặc biện pháp dự phòng tai biến một cách khách quan, chuẩn mực.",
+      "sourceSentence": {
+        "en": "In order to reduce the incidence of complications, patients at risk of CIN should be discussed with the referring team.",
+        "vi": "Nhằm giảm tỷ lệ biến chứng, những bệnh nhân có nguy cơ mắc bệnh thận do thuốc cản quang cần được thảo luận với đội ngũ lâm sàng chỉ định."
+      },
+      "quickExercises": [
+        {
+          "id": "g1",
+          "type": "mcq",
+          "prompt": "If a severe anaphylactic reaction occurs, the resuscitation team _____ immediately while basic life support measures are initiated.",
+          "options": [
+            "should be called",
+            "should calling",
+            "is call"
+          ],
+          "answer": "should be called",
+          "explanationVi": "Cấu trúc khuyến cáo bị động chuẩn y văn: 'should be + V3/ed' (đội hồi sức nên được gọi ngay lập tức)."
+        },
+        {
+          "id": "g2",
+          "type": "fill",
+          "prompt": "In patients with mild systemic reactions, symptomatic relief may be _____ (achieve) through the use of antihistamines.",
+          "answer": "achieved",
+          "explanationVi": "Sau 'may be' cần phân từ hai (V3/ed) của 'achieve' là 'achieved' để tạo thể bị động diễn tả khả năng điều trị."
+        },
+        {
+          "id": "g3",
+          "type": "mcq",
+          "prompt": "Patients presenting with altered sensation or skin blistering after contrast extravasation _____ by the surgical team.",
+          "options": [
+            "must reviewed",
+            "should be reviewed",
+            "be reviewing"
+          ],
+          "answer": "should be reviewed",
+          "explanationVi": "Dùng 'should be reviewed' (cần được thăm khám/đánh giá bởi đội ngoại khoa) đúng chuẩn văn phong hướng dẫn thực hành lâm sàng."
+        }
+      ]
+    },
+    {
+      "id": "gp_2",
+      "topic": "Participle Clauses & Prepositional Phrases for Risk Stratification (Mệnh đề phân từ và cụm giới từ mô tả yếu tố nguy cơ)",
+      "formula": "Patients + with [risk factor] / presenting with [clinical sign] + require / should have...",
+      "explanationVi": "Giúp bác sĩ CĐHA cô đọng thông tin tiền sử bệnh nhân (suy thận, dùng metformin, thoát mạch tiến triển) ngay trong một mệnh đề ngắn gọn khi hội chẩn hoặc ghi chú báo cáo.",
+      "sourceSentence": {
+        "en": "Patients with progressively worsening symptoms, reduced tissue perfusion, signs of skin ulceration/blistering or altered sensation should be reviewed by the local surgical/plastics team.",
+        "vi": "Những bệnh nhân có triệu chứng diễn tiến nặng dần, giảm tưới máu mô, dấu hiệu loét/phồng rộp da hoặc rối loạn cảm giác cần được đội ngũ ngoại khoa/phẫu thuật tạo hình tại chỗ thăm khám."
+      },
+      "quickExercises": [
+        {
+          "id": "g4",
+          "type": "mcq",
+          "prompt": "Reactions to contrast media vary depending on the agent used, _____ higher incidences occurring in ionic agents.",
+          "options": [
+            "with",
+            "which",
+            "because"
+          ],
+          "answer": "with",
+          "explanationVi": "Cấu trúc 'with + Noun + V-ing' ('with higher incidences occurring...') diễn tả tình huống đi kèm một cách súc tích trong văn viết khoa học."
+        },
+        {
+          "id": "g5",
+          "type": "fill",
+          "prompt": "Following imaging, patients _____ (be) at risk of developing CIN should have regular observation of renal function for at least 72 hours.",
+          "answer": "who are",
+          "explanationVi": "Hoặc rút gọn trực tiếp thành 'patients at risk of developing CIN'; nếu điền đầy đủ mệnh đề quan hệ xác định là 'who are'."
+        },
+        {
+          "id": "g6",
+          "type": "mcq",
+          "prompt": "Essential information _____ from the patient before contrast administration includes history of asthma and metformin therapy.",
+          "options": [
+            "seeking",
+            "sought",
+            "to seeking"
+          ],
+          "answer": "sought",
+          "explanationVi": "Phân từ quá khứ 'sought' (rút gọn của 'which should be sought') mang nghĩa bị động: 'Thông tin thiết yếu được khai thác từ bệnh nhân'."
+        }
+      ]
+    }
+  ],
+  "listening": {
+    "title": "On-Call Radiology Briefing: Contrast Safety & Emergency Response",
+    "notesTemplate": [
+      "Tiền sử bắt buộc phải sàng lọc trước tiêm thuốc cản quang (5 yếu tố)",
+      "Phác đồ xử trí phản vệ mức độ nhẹ và trung bình (liều lượng thuốc cấp cứu)",
+      "Dấu hiệu cảnh báo thoát mạch thuốc cản quang cần hội chẩn ngoại khoa"
+    ],
+    "transcriptSentences": [
+      {
+        "id": "s1",
+        "en": "In emergency radiology, intravenous contrast is indispensable for accurate CT interpretation, yet every injection carries a small risk of acute adverse reactions.",
+        "vi": "Trong chẩn đoán hình ảnh cấp cứu, thuốc cản quang đường tĩnh mạch là công cụ không thể thiếu để đọc phim CT chính xác, tuy nhiên mỗi mũi tiêm đều tiềm ẩn nguy cơ nhỏ gây phản ứng bất lợi cấp tính."
+      },
+      {
+        "id": "s2",
+        "en": "Before administration, the on-call radiologist must screen for five critical factors: prior contrast reactions, asthma, renal impairment, diabetes mellitus, and metformin therapy.",
+        "vi": "Trước khi tiêm, bác sĩ CĐHA trực phải sàng lọc năm yếu tố then chốt: tiền sử phản ứng thuốc cản quang, hen phế quản, suy giảm chức năng thận, đái tháo đường và việc đang điều trị bằng metformin."
+      },
+      {
+        "id": "s3",
+        "en": "If acute anaphylaxis develops with laryngeal oedema or refractory bronchospasm, administer 0.1 to 0.3 millilitres of intramuscular 1:1000 adrenaline immediately and summon the resuscitation team.",
+        "vi": "Nếu phản vệ cấp tính xuất hiện kèm phù thanh quản hoặc co thắt phế quản không đáp ứng thuốc hít, hãy tiêm bắp ngay 0,1 đến 0,3 mililít adrenaline 1:1000 và gọi đội hồi sức cấp cứu."
+      },
+      {
+        "id": "s4",
+        "en": "For patients with an estimated glomerular filtration rate below 60 millilitres per minute, consider pre-hydration and monitor renal function for at least 72 hours.",
+        "vi": "Đối với những bệnh nhân có mức lọc cầu thận ước tính dưới 60 mililít/phút, hãy cân nhắc bù dịch trước chụp và theo dõi chức năng thận trong ít nhất 72 giờ."
+      },
+      {
+        "id": "s5",
+        "en": "Finally, while most subcutaneous contrast extravasations resolve with limb elevation and ice packs, any sign of reduced tissue perfusion or skin blistering mandates urgent surgical review.",
+        "vi": "Cuối cùng, mặc dù đa số các trường hợp thoát mạch thuốc cản quang dưới da tự ổn định nhờ kê cao chi và chườm đá, bất kỳ dấu hiệu giảm tưới máu mô hoặc phồng rộp da nào cũng bắt buộc phải hội chẩn ngoại khoa khẩn."
+      }
+    ],
+    "gapFill": [
+      {
+        "id": "lg1",
+        "sentence": "Before contrast administration, radiologists must screen for prior reactions, asthma, renal impairment, diabetes mellitus, and _____ therapy.",
+        "answer": "metformin",
+        "hint": "Tên một loại thuốc điều trị đái tháo đường cần kiểm tra trước tiêm cản quang"
+      },
+      {
+        "id": "lg2",
+        "sentence": "Moderate anaphylaxis with laryngeal oedema requires 0.1 to 0.3 ml of intramuscular 1:1000 _____.",
+        "answer": "adrenaline",
+        "hint": "Thuốc cấp cứu đầu tay trong phản vệ trung bình đến nặng"
+      },
+      {
+        "id": "lg3",
+        "sentence": "Patients at risk of contrast-induced nephropathy require regular monitoring of renal function for at least _____ hours.",
+        "answer": "72",
+        "hint": "Số giờ tối thiểu cần theo dõi chức năng thận sau tiêm cản quang"
+      }
+    ],
+    "mcq": [
+      {
+        "id": "lm1",
+        "question": "Which combination of clinical signs during contrast extravasation requires urgent review by the surgical or plastics team?",
+        "options": [
+          "Mild transient warmth and self-limiting nausea",
+          "Reduced tissue perfusion, skin blistering, or altered sensation",
+          "Isolated mild urticaria responsive to oral antihistamines",
+          "Asymptomatic small-volume subcutaneous pooling"
+        ],
+        "answer": "Reduced tissue perfusion, skin blistering, or altered sensation",
+        "explanationVi": "Theo tài liệu, bệnh nhân thoát mạch có triệu chứng nặng dần, giảm tưới máu mô, loét/phồng rộp da hoặc thay đổi cảm giác phải được đội ngoại khoa/phẫu thuật tạo hình thăm khám để loại trừ chèn ép khoang và hoại tử da."
+      },
+      {
+        "id": "lm2",
+        "question": "What is the recommended initial management for mild contrast-induced bronchospasm?",
+        "options": [
+          "Intravenous bolus of 1 mg adrenaline",
+          "Oxygen by mask at 6–10 litres/min and 2–3 puffs of a beta-2 agonist inhaler",
+          "Immediate surgical fasciotomy",
+          "Oral metformin administration and fluid restriction"
+        ],
+        "answer": "Oxygen by mask at 6–10 litres/min and 2–3 puffs of a beta-2 agonist inhaler",
+        "explanationVi": "Co thắt phế quản nhẹ được xử trí bằng oxy qua mặt nạ (6–10 lít/phút) kết hợp xịt thuốc đồng vận beta-2 (2–3 nhát)."
+      }
+    ]
+  },
+  "reading": {
+    "title": "Navigating Acute Contrast Media Reactions in On-Call Radiology",
+    "paragraphs": [
+      {
+        "id": "p1",
+        "en": "Intravenous iodinated contrast media play an essential role in emergency computed tomography interpretation, yet their administration must always be weighed against potential adverse events. Acute reactions occur more frequently with ionic agents than with non-ionic formulations, and although fatal reactions are exceedingly rare—occurring in approximately 1 in 170,000 patients—on-call radiologists must remain vigilant. Prior to injection, a targeted clinical history should be obtained to identify key risk factors, including previous contrast reactions, asthma, pre-existing renal impairment, diabetes mellitus, and concurrent metformin therapy. Furthermore, radiology personnel administering contrast must maintain up-to-date life support certification and involve the medical emergency team whenever clinically indicated.",
+        "vi": "Thuốc cản quang iod đường tĩnh mạch đóng vai trò thiết yếu trong việc phân tích hình ảnh cắt lớp vi tính cấp cứu, tuy nhiên việc sử dụng thuốc luôn phải được cân nhắc kỹ lưỡng trước các biến cố bất lợi tiềm ẩn. Các phản ứng cấp tính xảy ra thường xuyên hơn ở nhóm thuốc ion hóa so với nhóm không ion hóa, và mặc dù phản ứng gây tử vong cực kỳ hiếm gặp — xảy ra ở khoảng 1 trên 170.000 bệnh nhân — các bác sĩ CĐHA trực vẫn phải luôn cảnh giác. Trước khi tiêm, cần khai thác bệnh sử có trọng điểm để xác định các yếu tố nguy cơ chính, bao gồm tiền sử phản ứng thuốc cản quang trước đó, hen phế quản, suy giảm chức năng thận có sẵn, đái tháo đường và việc đang điều trị đồng thời bằng metformin. Hơn nữa, nhân viên y tế khoa CĐHA thực hiện tiêm thuốc phải duy trì chứng chỉ hồi sức cấp cứu cập nhật và huy động đội cấp cứu nội viện bất cứ khi nào có chỉ định lâm sàng."
+      },
+      {
+        "id": "p2",
+        "en": "Acute adverse events span a broad clinical spectrum, from self-limiting systemic symptoms such as nausea, vomiting, warm flushing, and mild urticaria to life-threatening anaphylaxis. Mild systemic reactions rarely pose serious danger and may be managed symptomatically with antihistamines, provided the event is documented in the patient's medical record. Conversely, anaphylaxis demands immediate intervention following advanced life support protocols. Mild anaphylactic manifestations, such as protracted urticaria or mild bronchospasm, are treated with antihistamines, high-flow mask oxygen (6–10 litres/min), and 2–3 puffs of a beta-2 agonist inhaler. If moderate anaphylaxis ensues—characterised by profound urticaria, laryngeal oedema, or inhaler-refractory bronchospasm—intramuscular adrenaline 1:1000 (0.1–0.3 ml) is indicated alongside urgent resuscitation team activation.",
+        "vi": "Các biến cố bất lợi cấp tính trải dài trên một phổ lâm sàng rộng, từ các triệu chứng toàn thân tự giới hạn như buồn nôn, nôn, cảm giác nóng bừng mặt và mày đay nhẹ cho đến phản vệ đe dọa tính mạng. Các phản ứng toàn thân nhẹ hiếm khi gây nguy hiểm nghiêm trọng và có thể điều trị triệu chứng bằng thuốc kháng histamin, với điều kiện sự cố này được ghi nhận vào hồ sơ bệnh án của bệnh nhân. Ngược lại, phản vệ đòi hỏi can thiệp ngay lập tức theo phác đồ hồi sức nâng cao. Các biểu hiện phản vệ nhẹ như mày đay kéo dài hoặc co thắt phế quản nhẹ được xử trí bằng thuốc kháng histamin, thở oxy qua mặt nạ (6–10 lít/phút) và 2–3 nhát xịt thuốc đồng vận beta-2. Nếu phản vệ mức độ trung bình xảy ra — đặc trưng bởi mày đay lan rộng dữ dội, phù thanh quản hoặc co thắt phế quản không đáp ứng thuốc hít — chỉ định tiêm bắp adrenaline 1:1000 (0,1–0,3 ml) đồng thời kích hoạt khẩn cấp đội hồi sức."
+      },
+      {
+        "id": "p3",
+        "en": "Beyond immediate hypersensitivity, on-call radiologists must mitigate contrast-induced nephropathy (CIN) and mechanical extravasation injuries. Patients with pre-existing renal dysfunction—typically guided by an estimated glomerular filtration rate (eGFR) below 60 ml/min—dehydration, nephrotoxic medications, or repeated contrast doses require multidisciplinary discussion regarding pre-hydration or non-contrast alternatives, followed by renal function surveillance for at least 72 hours. Meanwhile, contrast extravasation into subcutaneous tissues during hand or power-pump injection usually resolves conservatively with limb elevation and ice packs. Nevertheless, patients developing progressive pain, diminished tissue perfusion, skin ulceration or blistering, or altered sensation require prompt evaluation by surgical or plastic surgery specialists to exclude compartment syndrome or skin necrosis.",
+        "vi": "Bên cạnh phản ứng quá mẫn tức thì, bác sĩ CĐHA trực phải giảm thiểu nguy cơ bệnh thận do thuốc cản quang (CIN) và tổn thương cơ học do thoát mạch. Những bệnh nhân có rối loạn chức năng thận từ trước — thường được định hướng bởi mức lọc cầu thận ước tính (eGFR) dưới 60 ml/phút — mất nước, đang dùng thuốc độc thận hoặc tiêm nhiều liều cản quang trong thời gian ngắn cần được hội chẩn đa chuyên khoa về việc bù dịch trước chụp hoặc lựa chọn phương pháp không tiêm thuốc, sau đó theo dõi chức năng thận ít nhất 72 giờ. Trong khi đó, thoát mạch thuốc cản quang vào mô dưới da trong quá trình tiêm tay hoặc bơm tiêm điện thường hồi phục bảo tồn bằng cách kê cao chi và chườm đá. Tuy nhiên, những bệnh nhân xuất hiện đau tiến triển, giảm tưới máu mô, loét hoặc phồng rộp da, hoặc rối loạn cảm giác cần được bác sĩ ngoại khoa hoặc phẫu thuật tạo hình đánh giá kịp thời để loại trừ hội chứng chèn ép khoang hoặc hoại tử da."
+      }
+    ],
+    "glossary": [
+      {
+        "termKey": "iodinated_contrast_media",
+        "term": "iodinated contrast media",
+        "ipa": "/ˈaɪ.ə.daɪ.neɪ.tɪd ˈkɒn.trɑːst ˈmiː.di.ə/",
+        "wordRoot": "iodes (màu tím, gốc Hy Lạp) + contra- (đối lập) + medium (chất trung gian)",
+        "meaningVi": "thuốc cản quang chứa iod"
+      },
+      {
+        "termKey": "pre_hydration",
+        "term": "pre-hydration",
+        "ipa": "/ˌpriː.haɪˈdreɪ.ʃən/",
+        "wordRoot": "pre- (trước) + hydr- (nước, gốc Hy Lạp hydor) + -ation",
+        "meaningVi": "bù dịch dự phòng trước thủ thuật / trước tiêm thuốc cản quang"
+      },
+      {
+        "termKey": "nephrotoxic_medication",
+        "term": "nephrotoxic medication",
+        "ipa": "/ˌnef.rəʊˈtɒk.sɪk ˌmed.ɪˈkeɪ.ʃən/",
+        "wordRoot": "nephro- (thận) + toxikon (chất độc, gốc Hy Lạp) + medicari (chữa trị)",
+        "meaningVi": "thuốc gây độc cho thận"
+      },
+      {
+        "termKey": "skin_necrosis",
+        "term": "skin necrosis",
+        "ipa": "/skɪn nəˈkrəʊ.sɪs/",
+        "wordRoot": "nekros (xác chết/chết mô, gốc Hy Lạp) + -osis (tình trạng bệnh lý)",
+        "meaningVi": "hoại tử da"
+      }
+    ],
+    "questions": {
+      "mcq": [
+        {
+          "id": "r_mcq1",
+          "question": "According to the passage, what is the approximate incidence of fatal reactions to intravenous contrast media?",
+          "options": [
+            "1 in 1,700 patients",
+            "1 in 17,000 patients",
+            "1 in 170,000 patients",
+            "1 in 1,700,000 patients"
+          ],
+          "answer": "1 in 170,000 patients",
+          "evidenceParagraph": "p1",
+          "explanationVi": "Đoạn 1 nêu rõ tỷ lệ phản ứng gây tử vong do thuốc cản quang đường tĩnh mạch xảy ra ở khoảng 1 trên 170.000 người (theo Vamasivayam et al., 2006)."
+        },
+        {
+          "id": "r_mcq2",
+          "question": "Which eGFR threshold is cited in the text as a guide for suggesting renal impairment prior to contrast administration?",
+          "options": [
+            "Below 90 ml/min",
+            "Below 60 ml/min",
+            "Below 45 ml/min",
+            "Below 30 ml/min"
+          ],
+          "answer": "Below 60 ml/min",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Đoạn 3 nêu mức lọc cầu thận ước tính (eGFR) dưới 60 ml/phút được dùng làm ngưỡng tham chiếu gợi ý suy giảm chức năng thận."
+        }
+      ],
+      "tfng": [
+        {
+          "id": "r_tf1",
+          "statement": "Non-ionic contrast agents are associated with a higher incidence of acute reactions than ionic agents.",
+          "answer": "FALSE",
+          "evidenceParagraph": "p1",
+          "explanationVi": "SAI — Đoạn 1 khẳng định tỷ lệ phản ứng cấp tính xảy ra cao hơn ở thuốc cản quang ion hóa (ionic agents) so với thuốc không ion hóa (non-ionic)."
+        },
+        {
+          "id": "r_tf2",
+          "statement": "Contrast extravasation only occurs when contrast media is delivered via an automated power pump.",
+          "answer": "FALSE",
+          "evidenceParagraph": "p3",
+          "explanationVi": "SAI — Đoạn 3 nêu rõ thoát mạch có thể xảy ra với cả tiêm tay (hand injection) và bơm tiêm điện (pump injection)."
+        },
+        {
+          "id": "r_tf3",
+          "statement": "Patients with mild self-limiting urticaria should always be pre-medicated with oral corticosteroids before all future MRI scans.",
+          "answer": "NOT GIVEN",
+          "evidenceParagraph": "p2",
+          "explanationVi": "KHÔNG ĐƯỢC ĐỀ CẬP — Đoạn 2 chỉ yêu cầu ghi nhận phản ứng nhẹ vào hồ sơ bệnh án để tham khảo sau này, không đề cập đến dự phòng corticoid cho chụp MRI."
+        }
+      ],
+      "matching": [
+        {
+          "id": "r_m1",
+          "prompt": "Mild bronchospasm following IV contrast",
+          "options": [
+            "Oxygen by mask (6–10 L/min) and beta-2 agonist inhaler (2–3 puffs)",
+            "Intramuscular adrenaline 1:1000 (0.1–0.3 ml)",
+            "Limb elevation and ice packs",
+            "Regular renal function observation for at least 72 hours"
+          ],
+          "answer": "Oxygen by mask (6–10 L/min) and beta-2 agonist inhaler (2–3 puffs)",
+          "evidenceParagraph": "p2"
+        },
+        {
+          "id": "r_m2",
+          "prompt": "Laryngeal oedema or inhaler-refractory bronchospasm",
+          "options": [
+            "Oxygen by mask (6–10 L/min) and beta-2 agonist inhaler (2–3 puffs)",
+            "Intramuscular adrenaline 1:1000 (0.1–0.3 ml)",
+            "Limb elevation and ice packs",
+            "Regular renal function observation for at least 72 hours"
+          ],
+          "answer": "Intramuscular adrenaline 1:1000 (0.1–0.3 ml)",
+          "evidenceParagraph": "p2"
+        },
+        {
+          "id": "r_m3",
+          "prompt": "Uncomplicated subcutaneous contrast extravasation",
+          "options": [
+            "Oxygen by mask (6–10 L/min) and beta-2 agonist inhaler (2–3 puffs)",
+            "Intramuscular adrenaline 1:1000 (0.1–0.3 ml)",
+            "Limb elevation and ice packs",
+            "Regular renal function observation for at least 72 hours"
+          ],
+          "answer": "Limb elevation and ice packs",
+          "evidenceParagraph": "p3"
+        }
+      ],
+      "completion": [
+        {
+          "id": "r_c1",
+          "prompt": "Although mild systemic reactions are generally self-limiting, they should be documented in the patient's _____ for future reference.",
+          "answer": "medical record",
+          "evidenceParagraph": "p2"
+        },
+        {
+          "id": "r_c2",
+          "prompt": "Severe contrast extravasation with reduced tissue perfusion requires surgical evaluation to rule out skin necrosis or _____.",
+          "answer": "compartment syndrome",
+          "evidenceParagraph": "p3"
+        }
+      ]
+    }
+  },
+  "writing": {
+    "paraphraseTasks": [
+      {
+        "id": "w1",
+        "type": "translation",
+        "prompt": "Dịch sang tiếng Anh y khoa: Trước khi tiêm thuốc cản quang tĩnh mạch, bác sĩ CĐHA cần khai thác tiền sử phản ứng thuốc cản quang, hen phế quản, suy thận, đái tháo đường và việc sử dụng metformin.",
+        "targetKeywords": [
+          "intravenous contrast",
+          "renal impairment",
+          "metformin therapy"
+        ],
+        "modelAnswer": "Prior to intravenous contrast administration, the radiologist should obtain a clinical history of previous contrast reactions, asthma, renal impairment, diabetes mellitus, and metformin therapy.",
+        "noteVi": "Sử dụng cụm 'prior to intravenous contrast administration' và danh từ chuyên khoa 'renal impairment' thay cho cách diễn đạt thông thường."
+      },
+      {
+        "id": "w2",
+        "type": "paraphrase",
+        "prompt": "Paraphrase câu sau theo văn phong báo cáo học thuật trang trọng: 'Patients with a GFR below 60 ml/min have a higher chance of kidney damage after contrast, so we need to check their kidneys for 3 days.'",
+        "targetKeywords": [
+          "contrast-induced nephropathy",
+          "estimated glomerular filtration rate",
+          "72 hours"
+        ],
+        "modelAnswer": "Patients with an estimated glomerular filtration rate (eGFR) below 60 ml/min are at increased risk of developing contrast-induced nephropathy and require regular renal function monitoring for at least 72 hours.",
+        "noteVi": "Chuyển đổi 'kidney damage after contrast' thành thuật ngữ chuẩn 'contrast-induced nephropathy' và '3 days' thành 'at least 72 hours'."
+      },
+      {
+        "id": "w3",
+        "type": "translation",
+        "prompt": "Dịch sang tiếng Anh y khoa: Nếu xuất hiện phản vệ mức độ trung bình kèm phù thanh quản hoặc co thắt phế quản không đáp ứng thuốc hít, cần tiêm bắp ngay adrenaline 1:1000 với liều 0,1–0,3 ml.",
+        "targetKeywords": [
+          "laryngeal oedema",
+          "bronchospasm",
+          "intramuscularly"
+        ],
+        "modelAnswer": "In moderate anaphylactic reactions presenting with laryngeal oedema or bronchospasm unresponsive to inhalers, 0.1–0.3 ml of adrenaline 1:1000 should be administered intramuscularly.",
+        "noteVi": "Chú ý chính tả Anh-Anh 'laryngeal oedema' (theo sách nguồn) và trạng từ 'intramuscularly'."
+      },
+      {
+        "id": "w4",
+        "type": "paraphrase",
+        "prompt": "Paraphrase câu sau: 'Most contrast leaks under the skin get better on their own with raising the arm and putting ice on it, but bad cases can cause dead skin.'",
+        "targetKeywords": [
+          "contrast extravasation",
+          "self-limiting",
+          "skin necrosis"
+        ],
+        "modelAnswer": "Most cases of subcutaneous contrast extravasation are self-limiting and resolve with limb elevation and ice packs; however, severe cases may rarely progress to skin necrosis or compartment syndrome.",
+        "noteVi": "Thay thế 'leaks under the skin' bằng 'subcutaneous contrast extravasation' và 'dead skin' bằng 'skin necrosis'."
+      },
+      {
+        "id": "w5",
+        "type": "translation",
+        "prompt": "Dịch sang tiếng Anh y khoa: Mặc dù phản ứng gây tử vong do thuốc cản quang tĩnh mạch rất hiếm gặp (1 trên 170.000 người), việc sử dụng thuốc cản quang luôn phải được cân nhắc giữa lợi ích chẩn đoán và nguy cơ tai biến.",
+        "targetKeywords": [
+          "fatal reaction",
+          "balanced",
+          "potential risks"
+        ],
+        "modelAnswer": "Although fatal reactions to intravenous contrast media are rare (occurring in 1 in 170,000 individuals), contrast administration should always be balanced against its potential risks.",
+        "noteVi": "Cấu trúc bị động 'should always be balanced against' diễn đạt chính xác sự cân nhắc lợi ích – nguy cơ trên lâm sàng."
+      },
+      {
+        "id": "w6",
+        "type": "paraphrase",
+        "prompt": "Paraphrase câu sau: 'Mild reactions like throwing up and hives usually stop by themselves, though doctors should write them down in the patient's chart.'",
+        "targetKeywords": [
+          "systemic reactions",
+          "urticaria",
+          "medical records"
+        ],
+        "modelAnswer": "Mild acute systemic reactions, such as vomiting and urticaria, are typically self-limiting, although they should be documented in the patient's medical records for future reference.",
+        "noteVi": "Nâng cấp từ vựng thông thường ('throwing up', 'hives') sang thuật ngữ y khoa ('vomiting', 'urticaria')."
+      },
+      {
+        "id": "w7",
+        "type": "translation",
+        "prompt": "Dịch sang tiếng Anh y khoa: Những bệnh nhân thoát mạch thuốc cản quang có dấu hiệu giảm tưới máu mô, phồng rộp da hoặc rối loạn cảm giác phải được đội ngũ phẫu thuật tạo hình thăm khám khẩn.",
+        "targetKeywords": [
+          "reduced tissue perfusion",
+          "blistering",
+          "altered sensation"
+        ],
+        "modelAnswer": "Patients with contrast extravasation exhibiting reduced tissue perfusion, skin blistering, or altered sensation must be promptly reviewed by the local surgical or plastics team.",
+        "noteVi": "Liệt kê song song ba cụm danh từ triệu chứng báo động đỏ một cách mạch lạc."
+      },
+      {
+        "id": "w8",
+        "type": "paraphrase",
+        "prompt": "Paraphrase câu sau: 'When a patient has kidney trouble before the CT scan, the radiologist should talk to the referring doctor about giving fluids beforehand or skipping contrast.'",
+        "targetKeywords": [
+          "pre-existing renal dysfunction",
+          "referring team",
+          "pre-hydration"
+        ],
+        "modelAnswer": "In patients with pre-existing renal dysfunction, the radiologist should discuss management options with the referring team, including pre-hydration or performing an unenhanced examination.",
+        "noteVi": "Sử dụng 'unenhanced examination' thay cho 'skipping contrast' để đạt văn phong CĐHA chuyên nghiệp."
+      }
+    ],
+    "essayTask": {
+      "prompt": "Write a structured clinical incident note and radiological management summary (at least 150 words) for an on-call case in which a 62-year-old diabetic patient with an eGFR of 52 ml/min develops acute moderate anaphylaxis (laryngeal oedema and persistent bronchospasm) and right antecubital contrast extravasation during an emergency contrast-enhanced CT scan.",
+      "minWords": 150,
+      "recommendedMinutes": 20,
+      "models": {
+        "band7": "During an emergency contrast-enhanced CT scan, a 62-year-old diabetic patient with an estimated glomerular filtration rate (eGFR) of 52 ml/min developed an acute moderate anaphylactic reaction and right antecubital contrast extravasation. Immediately after intravenous contrast injection, the patient presented with profound urticaria, laryngeal oedema, and bronchospasm that did not respond to initial beta-2 agonist inhaler puffs and mask oxygen at 8 litres/min. Following the advanced life support algorithm, 0.2 ml of adrenaline 1:1000 was administered intramuscularly, and the hospital medical emergency team was called. Simultaneously, localized swelling and erythema were noted at the right antecubital injection site due to subcutaneous contrast extravasation. The right upper limb was elevated and ice packs were applied to reduce discomfort. Because the patient has pre-existing renal impairment (eGFR below 60 ml/min) and diabetes, regular renal function monitoring for at least 72 hours was arranged with the referring team to detect contrast-induced nephropathy. Surgical review was also requested to monitor tissue perfusion and exclude compartment syndrome.",
+        "band8": "Clinical Incident & On-Call Radiology Management Summary: A 62-year-old patient with diabetes mellitus and pre-existing renal impairment (eGFR 52 ml/min) experienced two simultaneous acute complications during an emergency contrast-enhanced CT examination: moderate anaphylaxis and right antecubital contrast extravasation. Immediately following automated pump injection of intravenous iodinated contrast, the patient developed widespread urticaria, laryngeal oedema, and bronchospasm refractory to high-flow mask oxygen (6–10 litres/min) and three puffs of a beta-2 agonist inhaler. In accordance with Resuscitation Council advanced life support guidelines, 0.2 ml of intramuscular adrenaline 1:1000 was promptly administered while activating the medical emergency team. Concurrently, subcutaneous contrast extravasation was identified in the right antecubital fossa, manifesting as acute erythema and swelling. Conservative management was initiated via limb elevation and ice packs, alongside close neurovascular observation for red-flag signs such as reduced tissue perfusion, skin blistering, or altered sensation that would warrant urgent plastics review. Finally, given the baseline eGFR below 60 ml/min, the referring team was advised to monitor renal function for at least 72 hours for contrast-induced nephropathy and review metformin therapy.",
+        "band9": "ON-CALL RADIOLOGY ADVERSE EVENT & CLINICAL HANDOVER REPORT\n\nPatient Profile & Risk Stratification: A 62-year-old patient with diabetes mellitus and baseline renal dysfunction (eGFR 52 ml/min) underwent an emergency contrast-enhanced CT scan, during which acute moderate anaphylaxis and right antecubital contrast extravasation occurred concurrently.\n\nAcute Anaphylaxis Management: Shortly after intravenous contrast administration, the patient exhibited profound urticaria, laryngeal oedema, and bronchospasm unresponsive to mask oxygen (8 litres/min) and three puffs of a beta-2 agonist inhaler. Recognizing moderate-to-severe anaphylaxis, the radiology team immediately administered 0.2 ml of intramuscular 1:1000 adrenaline and summoned the hospital resuscitation team in accordance with advanced life support protocols. All events were formally documented in the patient's medical record.\n\nExtravasation & Renal Surveillance Plan: Subcutaneous contrast extravasation at the right antecubital fossa was managed initially with limb elevation and ice packs. Strict neurovascular checks were instituted to detect progressive pain, diminished tissue perfusion, skin blistering, or altered sensation, which would mandate immediate surgical or plastics consultation to rule out compartment syndrome or skin necrosis. Owing to the pre-existing eGFR < 60 ml/min, formal surveillance of renal function for a minimum of 72 hours and temporary withholding of metformin were coordinated with the referring clinical team to mitigate contrast-induced nephropathy."
+      }
+    }
+  },
+  "speaking": {
+    "stages": [
+      {
+        "stage": 1,
+        "title": "Stage 1 — Quick Clinical Check",
+        "prompts": [
+          {
+            "question": "What five pieces of clinical history must you check before administering intravenous contrast media in an emergency setting?",
+            "sampleAnswer": "Before giving IV contrast, I always screen for five key factors: any history of a previous contrast reaction, asthma, pre-existing renal impairment, diabetes mellitus, and whether the patient is currently taking metformin.",
+            "hintVi": "Liệt kê đủ 5 yếu tố: tiền sử phản ứng thuốc cản quang, hen phế quản, suy thận, đái tháo đường, và điều trị metformin."
+          },
+          {
+            "question": "How do you manage a mild, self-limiting systemic reaction to intravenous contrast?",
+            "sampleAnswer": "Mild systemic reactions such as nausea, vomiting, warm flushing, or mild urticaria are usually self-limiting and pose no serious danger. We can offer symptomatic relief with antihistamines and must document the reaction in the patient's medical records for future reference.",
+            "hintVi": "Nêu tính chất tự giới hạn, điều trị triệu chứng bằng kháng histamin và ghi nhận vào hồ sơ bệnh án."
+          }
+        ]
+      },
+      {
+        "stage": 2,
+        "title": "Stage 2 — Case Cue Card",
+        "prepSeconds": 60,
+        "speakSeconds": 120,
+        "cueCard": "Describe how you would assess and manage a patient who develops acute complications during an on-call contrast-enhanced CT scan.",
+        "bulletPoints": [
+          "How you distinguish between mild and moderate-to-severe anaphylaxis",
+          "The exact pharmacological and emergency steps you take for laryngeal oedema or bronchospasm",
+          "How you manage subcutaneous contrast extravasation and when you escalate to surgery",
+          "What post-procedural follow-up is required for patients with pre-existing renal impairment"
+        ],
+        "sampleAnswer": "When managing acute contrast complications on call, rapid recognition and structured escalation are critical. First, we distinguish mild anaphylaxis—such as scattered, protracted urticaria or mild bronchospasm—from moderate-to-severe reactions characterized by profound urticaria, laryngeal oedema, or inhaler-refractory bronchospasm. For mild bronchospasm, I immediately administer oxygen via mask at 6 to 10 litres per minute along with 2 to 3 puffs of a beta-2 agonist inhaler and an antihistamine. However, if laryngeal oedema or refractory bronchospasm develops, I administer 0.1 to 0.3 millilitres of 1:1000 adrenaline intramuscularly and call the resuscitation team following the advanced life support algorithm. Second, if subcutaneous contrast extravasation occurs during pump injection, most cases are self-limiting and respond well to limb elevation and ice packs. Nonetheless, I closely inspect the limb for red-flag signs—namely progressively worsening pain, reduced tissue perfusion, skin ulceration or blistering, or altered sensation—and urgently refer to the surgical or plastics team to exclude compartment syndrome or skin necrosis. Finally, for patients at risk of contrast-induced nephropathy, such as those with an eGFR below 60 millilitres per minute, I coordinate with the referring team to ensure adequate hydration and regular renal function monitoring for at least 72 hours.",
+        "prompts": []
+      },
+      {
+        "stage": 3,
+        "title": "Stage 3 — Interventional Discussion",
+        "prompts": [
+          {
+            "question": "How should an on-call radiologist balance the urgent diagnostic need for contrast-enhanced CT against the risk of contrast-induced nephropathy in a critically ill patient?",
+            "sampleAnswer": "In emergency radiology, the diagnostic value of intravenous contrast is often crucial to guide immediate surgical or interventional decisions. When a patient has pre-existing renal impairment, such as an eGFR below 60 ml/min, or is taking nephrotoxic drugs, we must weigh the immediate life-saving benefit of an accurate scan against the risk of CIN. If the scan cannot be delayed or replaced by an unenhanced study, we proceed in close discussion with the referring team, optimize pre-hydration where haemodynamically safe, avoid repeated contrast doses, and mandate at least 72 hours of post-procedural renal surveillance.",
+            "hintVi": "Phân tích sự cân bằng giữa lợi ích chẩn đoán cấp cứu sống còn và nguy cơ CIN, vai trò hội chẩn đa chuyên khoa và theo dõi 72 giờ."
+          },
+          {
+            "question": "Why is it essential for radiology staff to maintain current life support training even when a hospital medical emergency team is available?",
+            "sampleAnswer": "Because severe contrast reactions such as acute anaphylaxis and cardiopulmonary collapse can progress within seconds of injection, waiting passively for the resuscitation team can cost lives. Having radiographers and radiologists trained in up-to-date life support ensures immediate airway management, oxygen delivery, and timely intramuscular adrenaline administration during the critical first minutes before the emergency team arrives.",
+            "hintVi": "Nhấn mạnh diễn tiến tối cấp của phản vệ/ngừng tim phổi đòi hỏi xử trí tại chỗ ngay trong những phút đầu trước khi đội cấp cứu có mặt."
+          }
+        ]
+      }
+    ],
+    "shadowing": {
+      "simple": [
+        {
+          "id": "sh_s1",
+          "en": "Reactions to contrast media / occur more frequently / with ionic agents.",
+          "vi": "Các phản ứng với thuốc cản quang / xảy ra thường xuyên hơn / ở nhóm thuốc ion hóa."
+        },
+        {
+          "id": "sh_s2",
+          "en": "Elevate the limb / and apply ice packs / to ease extravasation symptoms.",
+          "vi": "Kê cao chi / và chườm túi đá / để làm dịu triệu chứng thoát mạch."
+        },
+        {
+          "id": "sh_s3",
+          "en": "Monitor renal function / for at least seventy-two hours / after imaging.",
+          "vi": "Theo dõi chức năng thận / trong ít nhất bảy mươi hai giờ / sau khi chụp."
+        }
+      ],
+      "complex": [
+        {
+          "id": "sh_c1",
+          "en": "Although intravenous contrast / is often indispensable / in emergency CT interpretation, / its use must always be balanced / against potential adverse risks.",
+          "vi": "Mặc dù thuốc cản quang tĩnh mạch / thường không thể thiếu / trong đọc phim CT cấp cứu, / việc sử dụng thuốc phải luôn được cân nhắc / trước các nguy cơ tai biến tiềm ẩn."
+        },
+        {
+          "id": "sh_c2",
+          "en": "In moderate anaphylaxis / presenting with laryngeal oedema / or refractory bronchospasm, / administer intramuscular adrenaline / and summon the resuscitation team.",
+          "vi": "Trong phản vệ mức độ trung bình / biểu hiện phù thanh quản / hoặc co thắt phế quản kháng trị, / hãy tiêm bắp adrenaline / và gọi ngay đội hồi sức cấp cứu."
+        },
+        {
+          "id": "sh_c3",
+          "en": "Patients developing reduced tissue perfusion, / skin blistering, / or altered sensation / must be urgently reviewed / by the local surgical team.",
+          "vi": "Những bệnh nhân xuất hiện giảm tưới máu mô, / phồng rộp da, / hoặc rối loạn cảm giác / phải được thăm khám khẩn cấp / bởi đội ngũ ngoại khoa tại chỗ."
+        }
+      ]
+    }
+  }
+}

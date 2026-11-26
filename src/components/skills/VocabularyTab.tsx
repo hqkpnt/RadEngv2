@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
+  AlertTriangle,
   Award,
   CheckCircle2,
   Clock,
+  FileJson,
   Layers,
   Maximize2,
   Mic,
@@ -17,7 +19,8 @@ import {
   X,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { LessonPack } from '../../types/schema';
+import { LessonPack, VocabItem } from '../../types/schema';
+import { sanitizePlainText } from '../../utils/security';
 import {
   comparePronunciation,
   PronunciationResult,
@@ -31,6 +34,29 @@ interface VocabularyTabProps {
   timedMode: boolean;
 }
 
+const BULK_JSON_SAMPLE = `[
+  {
+    "term": "vasospasm",
+    "meaning": "Co thắt mạch máu não",
+    "ipa": "/ˈveɪ.zəʊ.spæz.əm/",
+    "pos": "noun",
+    "wordRoot": "vaso- (mạch) + spasm (co thắt)",
+    "clinicalNote": "Thường gặp sau xuất huyết dưới nhện hoặc kích thích vi ống thông.",
+    "exampleEn": "Intra-arterial nimodipine resolved severe catheter-induced vasospasm.",
+    "exampleVi": "Nimodipine bơm nội động mạch đã giải quyết tình trạng co thắt mạch nặng do ống thông."
+  },
+  {
+    "term": "extravasation",
+    "meaning": "Thoát mạch thuốc cản quang",
+    "ipa": "/ɪkˌstræv.əˈseɪ.ʃən/",
+    "pos": "noun",
+    "wordRoot": "extra- (ra ngoài) + vas (mạch máu)",
+    "clinicalNote": "Dấu hiệu nguy hiểm của thủng mạch hoặc chảy máu đang hoạt động trên DSA.",
+    "exampleEn": "Control angiography revealed no contrast extravasation after coil deployment.",
+    "exampleVi": "Chụp mạch kiểm tra không thấy thoát thuốc cản quang sau khi thả vòng xoắn kim loại."
+  }
+]`;
+
 export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode }) => {
   const {
     state,
@@ -38,6 +64,7 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
     toggleMastered,
     addCardToSrs,
     addLessonVocab,
+    bulkAddLessonVocab,
     removeLessonVocab,
     markSkillComplete,
     showToast,
@@ -45,8 +72,9 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
 
   const [mode, setMode] = useState<'list' | 'flashcard' | 'drill'>('list');
 
-  // Manual add card modal state
+  // Manual add card modal state (Single + Bulk JSON)
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addModalTab, setAddModalTab] = useState<'single' | 'bulk_json'>('single');
   const [newTerm, setNewTerm] = useState('');
   const [newMeaning, setNewMeaning] = useState('');
   const [newIpa, setNewIpa] = useState('');
@@ -56,6 +84,12 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
   const [newExEn, setNewExEn] = useState('');
   const [newExVi, setNewExVi] = useState('');
   const [alsoSrs, setAlsoSrs] = useState(true);
+
+  // Bulk JSON state
+  const [bulkJsonText, setBulkJsonText] = useState('');
+  const [bulkPreview, setBulkPreview] = useState<VocabItem[]>([]);
+  const [bulkErrors, setBulkErrors] = useState<string[]>([]);
+  const [bulkParseError, setBulkParseError] = useState<string | null>(null);
 
   // Flashcard state
   const [fcIdx, setFcIdx] = useState(0);
@@ -193,6 +227,112 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
     setNewNote('');
     setNewExEn('');
     setNewExVi('');
+    setAddModalOpen(false);
+  };
+
+  const handleValidateBulkJson = () => {
+    setBulkParseError(null);
+    setBulkErrors([]);
+    setBulkPreview([]);
+
+    const stripped = bulkJsonText
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+
+    if (!stripped) {
+      setBulkParseError('Vui lòng dán mảng JSON chứa các thẻ từ vựng.');
+      return;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stripped);
+    } catch (err) {
+      setBulkParseError(
+        `JSON không hợp lệ: ${err instanceof Error ? err.message : 'Sai cú pháp JSON'}`
+      );
+      return;
+    }
+
+    let rawArr: unknown[] = [];
+    if (Array.isArray(parsed)) {
+      rawArr = parsed;
+    } else if (parsed && typeof parsed === 'object') {
+      const obj = parsed as Record<string, unknown>;
+      if (Array.isArray(obj.vocabulary)) rawArr = obj.vocabulary;
+      else if (Array.isArray(obj.cards)) rawArr = obj.cards;
+      else if (Array.isArray(obj.items)) rawArr = obj.items;
+      else rawArr = [obj];
+    }
+
+    if (rawArr.length === 0) {
+      setBulkParseError('Mảng JSON trống — không có thẻ nào để nạp.');
+      return;
+    }
+
+    const valid: VocabItem[] = [];
+    const skipped: string[] = [];
+
+    rawArr.forEach((entry, idx) => {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+        skipped.push(`Mục #${idx + 1}: không phải đối tượng JSON hợp lệ.`);
+        return;
+      }
+      const o = entry as Record<string, unknown>;
+      const term = sanitizePlainText(o.term ?? o.word ?? o.front, 200).trim();
+      const meaningVi = sanitizePlainText(o.meaning ?? o.meaningVi ?? o.vi ?? o.back, 400).trim();
+
+      if (!term || !meaningVi) {
+        skipped.push(
+          `Mục #${idx + 1}${term ? ` ("${term}")` : ''}: thiếu trường bắt buộc term hoặc meaning.`
+        );
+        return;
+      }
+
+      const exObj =
+        o.example && typeof o.example === 'object' && !Array.isArray(o.example)
+          ? (o.example as Record<string, unknown>)
+          : {};
+
+      valid.push({
+        termKey: sanitizePlainText(o.termKey ?? '', 100).trim(),
+        term,
+        meaningVi,
+        ipa: sanitizePlainText(o.ipa ?? o.phonetic ?? '', 120).trim(),
+        pos: sanitizePlainText(o.pos ?? o.partOfSpeech ?? 'term', 40).trim() || 'term',
+        wordRoot: sanitizePlainText(o.wordRoot ?? o.root ?? o.etymology ?? '', 250).trim(),
+        noteVi: sanitizePlainText(o.clinicalNote ?? o.noteVi ?? o.note ?? '', 500).trim(),
+        exampleEn: sanitizePlainText(
+          o.exampleEn ?? exObj.en ?? (typeof o.example === 'string' ? o.example : ''),
+          600
+        ).trim(),
+        exampleVi: sanitizePlainText(
+          o.exampleVi ?? exObj.vi ?? o.translation ?? '',
+          600
+        ).trim(),
+        isCustom: true,
+      });
+    });
+
+    if (valid.length === 0) {
+      setBulkParseError('Không tìm thấy thẻ hợp lệ nào (mỗi thẻ cần có đủ "term" và "meaning").');
+      setBulkErrors(skipped);
+      return;
+    }
+
+    setBulkPreview(valid);
+    setBulkErrors(skipped);
+  };
+
+  const handleCommitBulkJson = () => {
+    if (bulkPreview.length === 0) return;
+    bulkAddLessonVocab(lesson.id, bulkPreview, alsoSrs);
+    setBulkJsonText('');
+    setBulkPreview([]);
+    setBulkErrors([]);
+    setBulkParseError(null);
     setAddModalOpen(false);
   };
 
@@ -693,7 +833,7 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
         </>
       )}
 
-      {/* Manual Flashcard Modal inside Lesson (Portaled to document.body so it always sits above Bottom Nav) */}
+      {/* Manual Flashcard Modal inside Lesson (Single + Bulk JSON, portaled to document.body) */}
       {typeof document !== 'undefined' &&
         createPortal(
           <AnimatePresence>
@@ -705,13 +845,12 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
                 exit={{ opacity: 0 }}
                 onClick={() => setAddModalOpen(false)}
               >
-                <motion.form
+                <motion.div
                   className="modal-box stack-md"
                   initial={{ opacity: 0, scale: 0.94, y: 14 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
                   onClick={(e) => e.stopPropagation()}
-                  onSubmit={handleSaveManualCard}
                 >
                   <div className="flex-between">
                     <h3 style={{ margin: 0 }}>Thêm thẻ Flashcard thủ công vào bài học</h3>
@@ -725,108 +864,301 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
                     </button>
                   </div>
 
-                  <div className="grid-2">
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Thuật ngữ tiếng Anh *</label>
-                      <input
-                        className="input"
-                        required
-                        placeholder="VD: vasospasm"
-                        value={newTerm}
-                        onChange={(e) => setNewTerm(e.target.value)}
-                      />
-                    </div>
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Nghĩa tiếng Việt *</label>
-                      <input
-                        className="input"
-                        required
-                        placeholder="VD: Co thắt mạch máu"
-                        value={newMeaning}
-                        onChange={(e) => setNewMeaning(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid-3">
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Phiên âm IPA</label>
-                      <input
-                        className="input mono"
-                        placeholder="/ˈveɪ.zəʊ.spæz.əm/"
-                        value={newIpa}
-                        onChange={(e) => setNewIpa(e.target.value)}
-                      />
-                    </div>
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Từ loại</label>
-                      <input
-                        className="input"
-                        placeholder="noun / verb / phrase"
-                        value={newPos}
-                        onChange={(e) => setNewPos(e.target.value)}
-                      />
-                    </div>
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Gốc từ (wordRoot)</label>
-                      <input
-                        className="input"
-                        placeholder="vaso- (mạch) + spasm (co thắt)"
-                        value={newRoot}
-                        onChange={(e) => setNewRoot(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="stack-sm">
-                    <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Ghi chú lâm sàng (tùy chọn)</label>
-                    <input
-                      className="input"
-                      placeholder="VD: Hay gặp sau xuất huyết dưới nhện hoặc kích thích ống thông..."
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="grid-2">
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Ví dụ tiếng Anh</label>
-                      <input
-                        className="input"
-                        placeholder="Mild catheter-induced vasospasm resolved after nimodipine."
-                        value={newExEn}
-                        onChange={(e) => setNewExEn(e.target.value)}
-                      />
-                    </div>
-                    <div className="stack-sm">
-                      <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Dịch ví dụ tiếng Việt</label>
-                      <input
-                        className="input"
-                        placeholder="Co thắt mạch nhẹ do ống thông đã hết sau dùng nimodipine."
-                        value={newExVi}
-                        onChange={(e) => setNewExVi(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <label className="flex-row" style={{ fontSize: '0.86rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={alsoSrs}
-                      onChange={(e) => setAlsoSrs(e.target.checked)}
-                    />
-                    <span>Đồng thời đẩy thẻ này vào hàng ôn tập SRS (SM-2)</span>
-                  </label>
-
-                  <div className="flex-row" style={{ justifyContent: 'flex-end' }}>
-                    <button type="button" className="btn" onClick={() => setAddModalOpen(false)}>
-                      Hủy
+                  {/* Mode switcher: Single vs Bulk JSON */}
+                  <div className="segmented" role="tablist" aria-label="Chế độ thêm thẻ">
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={addModalTab === 'single'}
+                      className={addModalTab === 'single' ? 'active' : ''}
+                      onClick={() => setAddModalTab('single')}
+                    >
+                      Nhập từng trường
                     </button>
-                    <button type="submit" className="btn btn-primary">
-                      <Plus size={15} /> Lưu thẻ vào bài học
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={addModalTab === 'bulk_json'}
+                      className={addModalTab === 'bulk_json' ? 'active' : ''}
+                      onClick={() => setAddModalTab('bulk_json')}
+                    >
+                      Dán nhanh hàng loạt (JSON)
                     </button>
                   </div>
-                </motion.form>
+
+                  {addModalTab === 'single' ? (
+                    <form className="stack-md" onSubmit={handleSaveManualCard}>
+                      <div className="grid-2">
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                            Thuật ngữ tiếng Anh *
+                          </label>
+                          <input
+                            className="input"
+                            required
+                            placeholder="VD: vasospasm"
+                            value={newTerm}
+                            onChange={(e) => setNewTerm(e.target.value)}
+                          />
+                        </div>
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                            Nghĩa tiếng Việt *
+                          </label>
+                          <input
+                            className="input"
+                            required
+                            placeholder="VD: Co thắt mạch máu"
+                            value={newMeaning}
+                            onChange={(e) => setNewMeaning(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid-3">
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Phiên âm IPA</label>
+                          <input
+                            className="input mono"
+                            placeholder="/ˈveɪ.zəʊ.spæz.əm/"
+                            value={newIpa}
+                            onChange={(e) => setNewIpa(e.target.value)}
+                          />
+                        </div>
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>Từ loại</label>
+                          <input
+                            className="input"
+                            placeholder="noun / verb / phrase"
+                            value={newPos}
+                            onChange={(e) => setNewPos(e.target.value)}
+                          />
+                        </div>
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                            Gốc từ (wordRoot)
+                          </label>
+                          <input
+                            className="input"
+                            placeholder="vaso- (mạch) + spasm (co thắt)"
+                            value={newRoot}
+                            onChange={(e) => setNewRoot(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="stack-sm">
+                        <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                          Ghi chú lâm sàng (tùy chọn)
+                        </label>
+                        <input
+                          className="input"
+                          placeholder="VD: Hay gặp sau xuất huyết dưới nhện hoặc kích thích ống thông..."
+                          value={newNote}
+                          onChange={(e) => setNewNote(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="grid-2">
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                            Ví dụ tiếng Anh
+                          </label>
+                          <input
+                            className="input"
+                            placeholder="Mild catheter-induced vasospasm resolved after nimodipine."
+                            value={newExEn}
+                            onChange={(e) => setNewExEn(e.target.value)}
+                          />
+                        </div>
+                        <div className="stack-sm">
+                          <label style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                            Dịch ví dụ tiếng Việt
+                          </label>
+                          <input
+                            className="input"
+                            placeholder="Co thắt mạch nhẹ do ống thông đã hết sau dùng nimodipine."
+                            value={newExVi}
+                            onChange={(e) => setNewExVi(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <label className="flex-row" style={{ fontSize: '0.86rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={alsoSrs}
+                          onChange={(e) => setAlsoSrs(e.target.checked)}
+                        />
+                        <span>Đồng thời đẩy thẻ này vào hàng ôn tập SRS (SM-2)</span>
+                      </label>
+
+                      <div className="flex-row" style={{ justifyContent: 'flex-end' }}>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() => setAddModalOpen(false)}
+                        >
+                          Hủy
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                          <Plus size={15} /> Lưu thẻ vào bài học
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="stack-md">
+                      <div className="flex-between flex-wrap">
+                        <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                          Dán mảng JSON (các key:{' '}
+                          <code className="mono">
+                            term, meaning, ipa, pos, wordRoot, clinicalNote, exampleEn, exampleVi
+                          </code>
+                          ):
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-soft"
+                          onClick={() => {
+                            setBulkJsonText(BULK_JSON_SAMPLE);
+                            setBulkParseError(null);
+                            setBulkErrors([]);
+                            setBulkPreview([]);
+                          }}
+                        >
+                          <FileJson size={14} /> Chèn JSON mẫu
+                        </button>
+                      </div>
+
+                      <textarea
+                        className="textarea mono"
+                        style={{ minHeight: 170, fontSize: '0.8rem' }}
+                        placeholder={BULK_JSON_SAMPLE}
+                        value={bulkJsonText}
+                        onChange={(e) => {
+                          setBulkJsonText(e.target.value);
+                          setBulkParseError(null);
+                        }}
+                      />
+
+                      <div className="flex-between flex-wrap">
+                        <button
+                          type="button"
+                          className="btn btn-soft"
+                          onClick={handleValidateBulkJson}
+                        >
+                          <CheckCircle2 size={15} /> Kiểm tra & Nạp thẻ
+                        </button>
+                        {bulkPreview.length > 0 && (
+                          <span className="badge badge-success">
+                            ✓ {bulkPreview.length} thẻ hợp lệ sẵn sàng lưu
+                          </span>
+                        )}
+                      </div>
+
+                      {bulkParseError && (
+                        <div
+                          className="card-subtle"
+                          style={{
+                            borderColor: 'var(--danger)',
+                            color: 'var(--danger)',
+                            fontSize: '0.84rem',
+                          }}
+                        >
+                          <AlertTriangle
+                            size={14}
+                            style={{ verticalAlign: '-2px', marginRight: 6 }}
+                          />
+                          {bulkParseError}
+                        </div>
+                      )}
+
+                      {bulkErrors.length > 0 && (
+                        <div
+                          className="card-subtle"
+                          style={{
+                            borderColor: 'var(--warning)',
+                            color: 'var(--warning)',
+                            fontSize: '0.8rem',
+                          }}
+                        >
+                          <strong>Đã bỏ qua {bulkErrors.length} mục thiếu dữ liệu:</strong>
+                          {bulkErrors.map((err, idx) => (
+                            <div key={idx}>• {err}</div>
+                          ))}
+                        </div>
+                      )}
+
+                      {bulkPreview.length > 0 && (
+                        <div
+                          className="card-subtle stack-sm"
+                          style={{ maxHeight: 190, overflowY: 'auto' }}
+                        >
+                          <strong style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                            XEM TRƯỚC DANH SÁCH THẺ ({bulkPreview.length})
+                          </strong>
+                          {bulkPreview.map((card, i) => (
+                            <div
+                              key={`${card.term}_${i}`}
+                              className="flex-between flex-wrap"
+                              style={{
+                                fontSize: '0.86rem',
+                                padding: '6px 0',
+                                borderBottom:
+                                  i < bulkPreview.length - 1 ? '1px solid var(--border)' : 'none',
+                              }}
+                            >
+                              <div>
+                                <strong style={{ color: 'var(--accent)' }}>{card.term}</strong>
+                                {card.ipa && (
+                                  <span
+                                    className="mono"
+                                    style={{
+                                      fontSize: '0.76rem',
+                                      color: 'var(--text-muted)',
+                                      marginLeft: 6,
+                                    }}
+                                  >
+                                    {card.ipa}
+                                  </span>
+                                )}
+                              </div>
+                              <span style={{ color: 'var(--text-secondary)' }}>{card.meaningVi}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <label className="flex-row" style={{ fontSize: '0.86rem', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={alsoSrs}
+                          onChange={(e) => setAlsoSrs(e.target.checked)}
+                        />
+                        <span>Đồng thời đẩy toàn bộ thẻ vào hàng ôn tập SRS (SM-2)</span>
+                      </label>
+
+                      <div className="flex-row" style={{ justifyContent: 'flex-end' }}>
+                        <button
+                          type="button"
+                          className="btn"
+                          onClick={() => setAddModalOpen(false)}
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          disabled={bulkPreview.length === 0}
+                          onClick={handleCommitBulkJson}
+                        >
+                          <Plus size={15} /> Lưu {bulkPreview.length > 0 ? bulkPreview.length : ''}{' '}
+                          thẻ vào bài học
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>,
