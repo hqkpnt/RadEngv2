@@ -626,26 +626,68 @@ export function normalizeLessonInput(
 ): NormalizeResult {
   const warnings: string[] = [];
 
+  if (input === null || input === undefined || typeof input !== 'object') {
+    throw new Error(
+      'Cấu trúc JSON không hợp lệ: gốc tệp phải là một đối tượng bài học ({ ... }) hoặc mảng bài học ([ ... ]).'
+    );
+  }
+
   let items: unknown[] = [];
   if (Array.isArray(input)) {
     items = input;
   } else {
     const obj = asObj(input);
-    if (Array.isArray(obj.lessons)) items = obj.lessons;
-    else if (Object.keys(obj).length > 0) items = [obj];
+    if ('lessons' in obj) {
+      if (!Array.isArray(obj.lessons)) {
+        throw new Error('Trường "lessons" phải là một mảng JSON ([ ... ]).');
+      }
+      items = obj.lessons;
+    } else if (Object.keys(obj).length > 0) {
+      items = [obj];
+    }
   }
 
   if (items.length === 0) {
-    throw new Error('Tệp JSON không chứa bài học hợp lệ (trống hoặc sai định dạng đối tượng).');
+    throw new Error('Tệp JSON không chứa bài học nào (mảng rỗng hoặc đối tượng trống).');
   }
 
   const lessons: LessonPack[] = items.map((item, idx) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      throw new Error(`Bài học #${idx + 1} không phải là đối tượng JSON hợp lệ ({ ... }).`);
+    }
+
     const raw = asObj(item);
+    if (raw.meta !== undefined && (typeof raw.meta !== 'object' || Array.isArray(raw.meta) || raw.meta === null)) {
+      throw new Error(`Bài học #${idx + 1}: trường "meta" phải là đối tượng JSON ({ title, subspecialty, sourceBook... }).`);
+    }
     const metaRaw = asObj(raw.meta);
 
     const title = asStr(metaRaw.title || raw.title || raw.name);
     if (!title) {
-      throw new Error(`Bài học #${idx + 1} thiếu tiêu đề (title / meta.title).`);
+      throw new Error(
+        `Bài học #${idx + 1} thiếu trường bắt buộc tiêu đề ("meta.title" hoặc "title").`
+      );
+    }
+
+    // Strict structural type checks so malformed skills never fail silently
+    const rawVocab = raw.vocabulary ?? raw.vocab;
+    if (rawVocab !== undefined && typeof rawVocab !== 'object') {
+      throw new Error(`Bài học "${title}": trường "vocabulary" sai kiểu (phải là mảng [...] hoặc đối tượng).`);
+    }
+    if (raw.grammar !== undefined && typeof raw.grammar !== 'object') {
+      throw new Error(`Bài học "${title}": trường "grammar" sai kiểu (phải là đối tượng hoặc mảng).`);
+    }
+    if (raw.listening !== undefined && (typeof raw.listening !== 'object' || Array.isArray(raw.listening))) {
+      throw new Error(`Bài học "${title}": trường "listening" sai kiểu (phải là đối tượng { ... }).`);
+    }
+    if (raw.reading !== undefined && (typeof raw.reading !== 'object' || Array.isArray(raw.reading))) {
+      throw new Error(`Bài học "${title}": trường "reading" sai kiểu (phải là đối tượng { ... }).`);
+    }
+    if (raw.writing !== undefined && (typeof raw.writing !== 'object' || Array.isArray(raw.writing))) {
+      throw new Error(`Bài học "${title}": trường "writing" sai kiểu (phải là đối tượng { ... }).`);
+    }
+    if (raw.speaking !== undefined && (typeof raw.speaking !== 'object' || Array.isArray(raw.speaking))) {
+      throw new Error(`Bài học "${title}": trường "speaking" sai kiểu (phải là đối tượng { ... }).`);
     }
 
     const titleVi = asStr(metaRaw.titleVi || raw.titleVi || raw.subtitle);
@@ -659,15 +701,43 @@ export function normalizeLessonInput(
       overrides?.subspecialty || rawSub || inferSubspecialty(`${title} ${titleVi} ${sourceBook}`);
 
     const id = asStr(raw.id || metaRaw.id) || `rad-${slugifyKey(title)}`;
-    const vocabulary = normalizeVocabulary(raw.vocabulary || raw.vocab);
+    const vocabulary = normalizeVocabulary(rawVocab);
     const grammar = normalizeGrammar(raw.grammar);
     const listening = normalizeListening(raw.listening);
     const reading = normalizeReading(raw.reading);
     const writing = normalizeWriting(raw.writing);
     const speaking = normalizeSpeaking(raw.speaking);
 
+    const hasAnySkillContent =
+      vocabulary.length > 0 ||
+      grammar.length > 0 ||
+      listening.transcriptSentences.length > 0 ||
+      listening.gapFill.length > 0 ||
+      listening.mcq.length > 0 ||
+      reading.paragraphs.length > 0 ||
+      writing.paraphraseTasks.length > 0 ||
+      speaking.stages.length > 0 ||
+      speaking.shadowing.simple.length > 0 ||
+      speaking.shadowing.complex.length > 0;
+
+    if (!hasAnySkillContent) {
+      throw new Error(
+        `Bài học "${title}" chưa có nội dung hợp lệ ở bất kỳ kỹ năng nào (cần tối thiểu 1 kỹ năng: vocabulary, grammar, listening, reading, writing hoặc speaking).`
+      );
+    }
+
     if (vocabulary.length === 0) warnings.push(`"${title}": chưa có mục Vocabulary.`);
     if (grammar.length === 0) warnings.push(`"${title}": chưa có mục Grammar.`);
+    if (listening.transcriptSentences.length === 0) {
+      warnings.push(`"${title}": chưa có nội dung Listening (transcript/gapFill).`);
+    }
+    if (reading.paragraphs.length === 0) warnings.push(`"${title}": chưa có đoạn văn Reading.`);
+    if (writing.paraphraseTasks.length === 0) {
+      warnings.push(`"${title}": chưa có câu luyện Writing (paraphraseTasks/sentenceTasks).`);
+    }
+    if (speaking.stages.length === 0 && speaking.shadowing.simple.length === 0) {
+      warnings.push(`"${title}": chưa có nội dung Speaking (stages/shadowing).`);
+    }
 
     return {
       schemaVersion: 2,

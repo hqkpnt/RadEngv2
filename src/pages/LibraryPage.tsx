@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   Check,
@@ -15,6 +15,7 @@ import {
   Plus,
   RefreshCw,
   RotateCcw,
+  Search,
   Tag,
   Trash2,
   Upload,
@@ -203,12 +204,19 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [importMode, setImportMode] = useState<'file' | 'paste'>('file');
+  const [pasteLessonJson, setPasteLessonJson] = useState('');
   const [overrideSub, setOverrideSub] = useState<string>('auto');
   const [overrideBook, setOverrideBook] = useState('');
   const [previewPacks, setPreviewPacks] = useState<LessonPack[]>([]);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorList, setErrorList] = useState<string[]>([]);
   const [includePacksInBackup, setIncludePacksInBackup] = useState(true);
+
+  // Search & Filter for Block 3 (Imported Packs Library)
+  const [packQuery, setPackQuery] = useState('');
+  const [packSubFilter, setPackSubFilter] = useState<string>('all');
+  const [packBookFilter, setPackBookFilter] = useState<string>('all');
 
   // Subspecialty CRUD state
   const [newSubLabel, setNewSubLabel] = useState('');
@@ -220,33 +228,92 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
   const [editPackSub, setEditPackSub] = useState('');
   const [editPackBook, setEditPackBook] = useState('');
 
-  const importedOnly = lessons.filter((l) => !l.builtIn);
+  const importedOnly = useMemo(() => lessons.filter((l) => !l.builtIn), [lessons]);
+  const existingLessonIds = useMemo(() => new Set(lessons.map((l) => l.id)), [lessons]);
+
+  const importedBooks = useMemo(() => {
+    const s = new Set<string>();
+    importedOnly.forEach((p) => {
+      if (p.meta.sourceBook) s.add(p.meta.sourceBook);
+    });
+    return Array.from(s).sort();
+  }, [importedOnly]);
+
+  const filteredImported = useMemo(() => {
+    const q = packQuery.trim().toLowerCase();
+    return importedOnly.filter((pack) => {
+      if (packSubFilter !== 'all' && pack.meta.subspecialty !== packSubFilter) return false;
+      if (packBookFilter !== 'all' && pack.meta.sourceBook !== packBookFilter) return false;
+      if (q) {
+        const vocabText = pack.vocabulary.map((v) => `${v.term} ${v.meaningVi}`).join(' ');
+        const hay = `${pack.meta.title} ${pack.meta.titleVi} ${pack.meta.sourceBook} ${getSubspecialtyLabel(pack.meta.subspecialty)} ${pack.meta.tags.join(' ')} ${vocabText}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [importedOnly, packQuery, packSubFilter, packBookFilter, getSubspecialtyLabel]);
+
+  const parseRawJsonString = (rawText: string, sourceLabel: string) => {
+    const stripped = rawText
+      .trim()
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+    if (!stripped) {
+      throw new Error(`${sourceLabel}: nội dung trống, chưa có dữ liệu JSON.`);
+    }
+    let json: unknown;
+    try {
+      json = JSON.parse(stripped);
+    } catch (err) {
+      throw new Error(
+        `${sourceLabel}: sai cú pháp JSON (${err instanceof Error ? err.message : 'không thể parse'}).`
+      );
+    }
+    return normalizeLessonInput(json, {
+      subspecialty: overrideSub === 'auto' ? undefined : overrideSub,
+      sourceBook: overrideBook.trim() || undefined,
+    });
+  };
 
   const parseFiles = async (files: FileList | File[]) => {
-    setErrorMsg(null);
+    setErrorList([]);
     setWarnings([]);
     const collected: LessonPack[] = [];
     const allWarnings: string[] = [];
+    const allErrors: string[] = [];
 
     for (const file of Array.from(files)) {
       try {
         const text = await file.text();
-        const json = JSON.parse(text);
-        const res = normalizeLessonInput(json, {
-          subspecialty: overrideSub === 'auto' ? undefined : overrideSub,
-          sourceBook: overrideBook.trim() || undefined,
-        });
+        const res = parseRawJsonString(text, `Tệp "${file.name}"`);
         collected.push(...res.lessons);
         allWarnings.push(...res.warnings);
       } catch (err) {
-        setErrorMsg(
-          `Lỗi đọc tệp "${file.name}": ${err instanceof Error ? err.message : 'JSON không hợp lệ'}`
+        allErrors.push(
+          err instanceof Error ? err.message : `Lỗi đọc tệp "${file.name}": JSON không hợp lệ.`
         );
       }
     }
 
     setPreviewPacks(collected);
     setWarnings(allWarnings);
+    setErrorList(allErrors);
+  };
+
+  const handleValidatePastedLesson = () => {
+    setErrorList([]);
+    setWarnings([]);
+    setPreviewPacks([]);
+    try {
+      const res = parseRawJsonString(pasteLessonJson, 'Chuỗi JSON');
+      setPreviewPacks(res.lessons);
+      setWarnings(res.warnings);
+    } catch (err) {
+      setErrorList([
+        err instanceof Error ? err.message : 'Chuỗi JSON không đúng cấu trúc gói bài học.',
+      ]);
+    }
   };
 
   const handleConfirmImport = async () => {
@@ -254,6 +321,8 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
     await importLessons(previewPacks);
     setPreviewPacks([]);
     setWarnings([]);
+    setErrorList([]);
+    setPasteLessonJson('');
   };
 
   const handleRestoreFile = async (file: File) => {
@@ -406,12 +475,27 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
                 });
                 setPreviewPacks(res.lessons);
                 setWarnings(res.warnings);
-                setErrorMsg(null);
+                setErrorList([]);
               }}
             >
               Thử nạp mẫu RadEng v3.1 ngay
             </button>
           </div>
+        </div>
+
+        <div className="segmented" style={{ maxWidth: 380 }}>
+          <button
+            className={importMode === 'file' ? 'active' : ''}
+            onClick={() => setImportMode('file')}
+          >
+            Tải tệp (.json)
+          </button>
+          <button
+            className={importMode === 'paste' ? 'active' : ''}
+            onClick={() => setImportMode('paste')}
+          >
+            Dán chuỗi JSON
+          </button>
         </div>
 
         <div className="grid-2">
@@ -446,54 +530,96 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
           </div>
         </div>
 
-        <div
-          className={`dropzone ${dragging ? 'dragging' : ''}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            if (e.dataTransfer.files.length > 0) parseFiles(e.dataTransfer.files);
-          }}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Upload size={26} style={{ color: 'var(--accent)', marginBottom: 6 }} />
-          <div style={{ fontWeight: 600 }}>
-            Kéo thả 1 hoặc nhiều tệp .json vào đây, hoặc bấm để chọn tệp
-          </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
-            Hỗ trợ tệp đơn bài học, mảng nhiều bài học, RadEng v3.1 và Spec v2.
-          </div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,application/json"
-            multiple
-            style={{ display: 'none' }}
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                parseFiles(e.target.files);
-                e.target.value = '';
-              }
+        {importMode === 'file' ? (
+          <div
+            className={`dropzone ${dragging ? 'dragging' : ''}`}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
             }}
-          />
-        </div>
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              if (e.dataTransfer.files.length > 0) parseFiles(e.dataTransfer.files);
+            }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Upload size={26} style={{ color: 'var(--accent)', marginBottom: 6 }} />
+            <div style={{ fontWeight: 600 }}>
+              Kéo thả 1 hoặc nhiều tệp .json vào đây, hoặc bấm để chọn tệp
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: 4 }}>
+              Hỗ trợ tệp đơn bài học, mảng nhiều bài học, RadEng v3.1 và Spec v2.
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              multiple
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  parseFiles(e.target.files);
+                  e.target.value = '';
+                }
+              }}
+            />
+          </div>
+        ) : (
+          <div className="stack-sm">
+            <textarea
+              className="textarea mono"
+              style={{ minHeight: 165, fontSize: '0.8rem' }}
+              placeholder='Dán trực tiếp JSON gói bài học xuất từ Gemini (hỗ trợ cả khung ```json ... ```)...'
+              value={pasteLessonJson}
+              onChange={(e) => {
+                setPasteLessonJson(e.target.value);
+                setErrorList([]);
+              }}
+            />
+            <div className="flex-row flex-wrap">
+              <button className="btn btn-primary" onClick={handleValidatePastedLesson}>
+                <CheckCircle2 size={15} /> Kiểm tra schema & Xem trước
+              </button>
+              {pasteLessonJson && (
+                <button
+                  className="btn btn-sm"
+                  onClick={() => {
+                    setPasteLessonJson('');
+                    setErrorList([]);
+                    setWarnings([]);
+                    setPreviewPacks([]);
+                  }}
+                >
+                  Xóa nội dung
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
-        {errorMsg && (
-          <div className="card-subtle" style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-            <AlertTriangle size={15} style={{ verticalAlign: '-2px', marginRight: 6 }} />
-            {errorMsg}
+        {errorList.length > 0 && (
+          <div
+            className="card-subtle stack-sm"
+            style={{ borderColor: 'var(--danger)', color: 'var(--danger)', fontSize: '0.86rem' }}
+          >
+            <strong>
+              <AlertTriangle size={15} style={{ verticalAlign: '-2px', marginRight: 6 }} />
+              Phát hiện {errorList.length} lỗi cấu trúc JSON (không thể nạp):
+            </strong>
+            {errorList.map((err, idx) => (
+              <div key={idx}>• {err}</div>
+            ))}
           </div>
         )}
 
         {warnings.length > 0 && (
           <div
-            className="card-subtle"
+            className="card-subtle stack-sm"
             style={{ borderColor: 'var(--warning)', color: 'var(--warning)', fontSize: '0.84rem' }}
           >
+            <strong>Lưu ý các kỹ năng đang trống ({warnings.length}):</strong>
             {warnings.map((w, i) => (
               <div key={i}>• {w}</div>
             ))}
@@ -527,6 +653,9 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
                     )}
                   </div>
                   <div className="flex-row flex-wrap" style={{ gap: 5 }}>
+                    {existingLessonIds.has(p.id) && (
+                      <span className="badge badge-warning">Trùng ID — sẽ ghi đè bản cũ</span>
+                    )}
                     <span className="badge badge-accent">
                       {getSubspecialtyLabel(p.meta.subspecialty)}
                     </span>
@@ -544,18 +673,89 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
         )}
       </section>
 
-      {/* Block 3: Imported Packs with Metadata Editing */}
+      {/* Block 3: Imported Packs with Search, Filter & Metadata Editing */}
       <section className="card stack-md">
-        <h2 style={{ margin: 0, fontSize: '1.1rem' }}>
-          3. Gói bài học đã nạp trong trình duyệt ({importedOnly.length})
-        </h2>
+        <div className="flex-between flex-wrap">
+          <h2 style={{ margin: 0, fontSize: '1.1rem' }}>
+            3. Gói bài học đã nạp trong trình duyệt ({filteredImported.length}/{importedOnly.length})
+          </h2>
+          {(packQuery || packSubFilter !== 'all' || packBookFilter !== 'all') && (
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                setPackQuery('');
+                setPackSubFilter('all');
+                setPackBookFilter('all');
+              }}
+            >
+              Xóa bộ lọc
+            </button>
+          )}
+        </div>
+
+        {importedOnly.length > 0 && (
+          <div className="flex-row flex-wrap">
+            <div style={{ position: 'relative', flex: 1, minWidth: 210 }}>
+              <Search
+                size={15}
+                style={{
+                  position: 'absolute',
+                  left: 10,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'var(--text-muted)',
+                }}
+              />
+              <input
+                className="input"
+                style={{ paddingLeft: 32 }}
+                placeholder="Tìm bài đã nạp theo tên, từ khóa, chủ đề, sách..."
+                value={packQuery}
+                onChange={(e) => setPackQuery(e.target.value)}
+              />
+            </div>
+
+            <select
+              className="select"
+              style={{ width: 210 }}
+              value={packSubFilter}
+              onChange={(e) => setPackSubFilter(e.target.value)}
+            >
+              <option value="all">Tất cả phân môn</option>
+              {subspecialties.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="select"
+              style={{ width: 220 }}
+              value={packBookFilter}
+              onChange={(e) => setPackBookFilter(e.target.value)}
+            >
+              <option value="all">Tất cả sách nguồn ({importedBooks.length})</option>
+              {importedBooks.map((b) => (
+                <option key={b} value={b}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {importedOnly.length === 0 ? (
           <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
             Chưa có gói bài tự nạp nào. Hiện ứng dụng có sẵn 1 bài mẫu CĐHA/DSA Neuro Thrombectomy.
           </div>
+        ) : filteredImported.length === 0 ? (
+          <div className="card-subtle" style={{ textAlign: 'center', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+            Không có gói bài học nào khớp với từ khóa hoặc bộ lọc đang chọn.
+          </div>
         ) : (
           <div className="stack-sm">
-            {importedOnly.map((pack) => {
+            {filteredImported.map((pack) => {
               const isEditing = editingPackId === pack.id;
               return (
                 <div key={pack.id} className="card-subtle stack-sm">

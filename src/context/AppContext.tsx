@@ -643,9 +643,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       const currentSnap = latestStateRef.current;
       const existingCustomSnap = currentSnap.customVocabByLesson[lessonId] || [];
-      const existingTermSetSnap = new Set(
-        existingCustomSnap.map((v) => v.term.trim().toLowerCase())
+      const baseLesson =
+        importedLessons.find((l) => l.id === lessonId) ||
+        builtInLessons.find((l) => l.id === lessonId);
+      const baseTermsSet = new Set(
+        (baseLesson?.vocabulary || []).map((v) => v.term.trim().toLowerCase())
       );
+      const existingTermSetSnap = new Set([
+        ...Array.from(baseTermsSet),
+        ...existingCustomSnap.map((v) => v.term.trim().toLowerCase()),
+      ]);
       const toInsertLesson = cleanedList.filter(
         (v) => !existingTermSetSnap.has(v.term.toLowerCase())
       );
@@ -671,7 +678,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       mutateState((prev) => {
         const existingCustom = prev.customVocabByLesson[lessonId] || [];
-        const existingTermSet = new Set(existingCustom.map((v) => v.term.trim().toLowerCase()));
+        const existingTermSet = new Set([
+          ...Array.from(baseTermsSet),
+          ...existingCustom.map((v) => v.term.trim().toLowerCase()),
+        ]);
         const freshLessonCards = cleanedList.filter(
           (v) => !existingTermSet.has(v.term.toLowerCase())
         );
@@ -732,7 +742,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       return addedLessonCount;
     },
-    [mutateState, showToast]
+    [mutateState, showToast, builtInLessons, importedLessons]
   );
 
   const removeLessonVocab = useCallback(

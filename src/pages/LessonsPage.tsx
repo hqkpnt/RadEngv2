@@ -75,7 +75,8 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
       if (statusFilter === 'done' && doneCount < 6) return false;
 
       if (q) {
-        const hay = `${l.meta.title} ${l.meta.titleVi} ${l.meta.sourceBook} ${getSubspecialtyLabel(l.meta.subspecialty)} ${l.meta.tags.join(' ')}`.toLowerCase();
+        const vocabText = l.vocabulary.map((v) => `${v.term} ${v.meaningVi}`).join(' ');
+        const hay = `${l.meta.title} ${l.meta.titleVi} ${l.meta.sourceBook} ${getSubspecialtyLabel(l.meta.subspecialty)} ${l.meta.tags.join(' ')} ${vocabText}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;

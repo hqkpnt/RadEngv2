@@ -274,6 +274,10 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
 
     const valid: VocabItem[] = [];
     const skipped: string[] = [];
+    const existingLessonTerms = new Set(
+      lesson.vocabulary.map((v) => v.term.trim().toLowerCase())
+    );
+    const seenInBatch = new Set<string>();
 
     rawArr.forEach((entry, idx) => {
       if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
@@ -290,6 +294,21 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
         );
         return;
       }
+
+      const lowerTerm = term.toLowerCase();
+      if (existingLessonTerms.has(lowerTerm)) {
+        skipped.push(
+          `Mục #${idx + 1} ("${term}"): trùng thuật ngữ đã có trong bài học hiện tại (đã bỏ qua).`
+        );
+        return;
+      }
+      if (seenInBatch.has(lowerTerm)) {
+        skipped.push(
+          `Mục #${idx + 1} ("${term}"): bị trùng lặp ngay trong danh sách vừa dán (đã bỏ qua).`
+        );
+        return;
+      }
+      seenInBatch.add(lowerTerm);
 
       const exObj =
         o.example && typeof o.example === 'object' && !Array.isArray(o.example)
@@ -317,7 +336,11 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
     });
 
     if (valid.length === 0) {
-      setBulkParseError('Không tìm thấy thẻ hợp lệ nào (mỗi thẻ cần có đủ "term" và "meaning").');
+      setBulkParseError(
+        skipped.length > 0
+          ? 'Không có thẻ mới hợp lệ nào (tất cả đều thiếu trường bắt buộc hoặc bị trùng thuật ngữ trong bài).'
+          : 'Không tìm thấy thẻ hợp lệ nào (mỗi thẻ cần có đủ "term" và "meaning").'
+      );
       setBulkErrors(skipped);
       return;
     }
