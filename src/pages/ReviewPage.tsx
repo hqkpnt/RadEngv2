@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowDown,
@@ -44,6 +44,8 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
   const { srs } = state;
   const [selectedFolder, setSelectedFolder] = useState<'all' | 'starred' | string>('all');
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const [visibleLimit, setVisibleLimit] = useState(60);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [newFolderOpen, setNewFolderOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
@@ -77,7 +79,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
   const now = Date.now();
 
   const filteredCards = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     const list = srs.cards.filter((c) => {
       if (selectedFolder === 'starred' && !c.starred) return false;
       if (selectedFolder !== 'all' && selectedFolder !== 'starred' && c.folderId !== selectedFolder) {
@@ -96,7 +98,12 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
     else if (srs.sortMode === 'hardest') sorted.sort((a, b) => a.easeFactor - b.easeFactor);
     else sorted.sort((a, b) => a.orderIndex - b.orderIndex);
     return sorted;
-  }, [srs.cards, srs.sortMode, selectedFolder, query]);
+  }, [srs.cards, srs.sortMode, selectedFolder, deferredQuery]);
+
+  const visibleCards = useMemo(
+    () => filteredCards.slice(0, visibleLimit),
+    [filteredCards, visibleLimit]
+  );
 
   const dueCardsInScope = useMemo(
     () => filteredCards.filter((c) => c.dueAt <= now),
@@ -769,7 +776,7 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                 </tr>
               </thead>
               <tbody>
-                {filteredCards.map((card) => {
+                {visibleCards.map((card) => {
                   const isDue = card.dueAt <= now;
                   const isEditing = editingCardId === card.id;
                   return (
@@ -922,6 +929,16 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                 })}
               </tbody>
             </table>
+            {filteredCards.length > visibleLimit && (
+              <div style={{ padding: 14, textAlign: 'center', borderTop: '1px solid var(--border)' }}>
+                <button
+                  className="btn btn-sm btn-soft"
+                  onClick={() => setVisibleLimit((n) => n + 60)}
+                >
+                  Hiển thị thêm (+60) · Đang xem {visibleCards.length}/{filteredCards.length} thẻ
+                </button>
+              </div>
+            )}
           </div>
         )}
       </section>

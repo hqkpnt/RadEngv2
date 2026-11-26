@@ -6,15 +6,84 @@ export interface CloudPullResult {
   cloudTimestamp: string;
 }
 
-export function isValidAppsScriptUrl(url: string): boolean {
-  const clean = sanitizeSyncUrl(url);
-  if (!clean) return false;
+export interface AppsScriptUrlDiagnosis {
+  valid: boolean;
+  level: 'idle' | 'ok' | 'warning' | 'error';
+  message: string;
+}
+
+export function diagnoseAppsScriptUrl(rawUrl: string): AppsScriptUrlDiagnosis {
+  const trimmed = rawUrl.trim();
+  if (!trimmed) {
+    return { valid: false, level: 'idle', message: '' };
+  }
+
+  const clean = sanitizeSyncUrl(trimmed);
+  if (!clean) {
+    return {
+      valid: false,
+      level: 'error',
+      message: 'URL không hợp lệ: bắt buộc bắt đầu bằng https://',
+    };
+  }
+
   try {
     const parsed = new URL(clean);
-    return parsed.protocol === 'https:' && parsed.hostname.length > 0;
+    const pathname = parsed.pathname.toLowerCase();
+
+    if (/\/edit(\/|$)/.test(pathname)) {
+      return {
+        valid: false,
+        level: 'error',
+        message:
+          'Bạn đang dán nhầm link trình soạn thảo (/edit)! Hãy vào Deploy → Manage deployments và chép link Web App kết thúc bằng /exec.',
+      };
+    }
+
+    if (/\/dev(\/|$)/.test(pathname)) {
+      return {
+        valid: false,
+        level: 'error',
+        message:
+          'Link thử nghiệm (/dev) yêu cầu đăng nhập Google nên không đồng bộ được từ web tĩnh. Hãy dùng link triển khai chính thức kết thúc bằng /exec.',
+      };
+    }
+
+    if (
+      parsed.hostname === 'script.google.com' ||
+      parsed.hostname === 'script.googleusercontent.com'
+    ) {
+      if (pathname.endsWith('/exec')) {
+        return {
+          valid: true,
+          level: 'ok',
+          message: '✓ Endpoint Web App (/exec) hợp lệ',
+        };
+      }
+      return {
+        valid: true,
+        level: 'warning',
+        message:
+          'Cảnh báo: URL script.google.com chưa kết thúc bằng /exec — hãy kiểm tra lại link Web App.',
+      };
+    }
+
+    return {
+      valid: true,
+      level: 'warning',
+      message: 'URL HTTPS tùy chỉnh (không phải endpoint script.google.com/.../exec)',
+    };
   } catch {
-    return false;
+    return {
+      valid: false,
+      level: 'error',
+      message: 'URL không đúng định dạng.',
+    };
   }
+}
+
+export function isValidAppsScriptUrl(url: string): boolean {
+  return diagnoseAppsScriptUrl(url).valid;
 }
 
 export function isOfficialAppsScriptHost(url: string): boolean {

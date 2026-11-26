@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useDeferredValue, useMemo, useState } from 'react';
 import { Award, Layers, Mic, Search, Square, Trash2, Volume2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
@@ -21,6 +21,8 @@ export const MasteredBankPage: React.FC = () => {
   } = useApp();
 
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
+  const [visibleLimit, setVisibleLimit] = useState(60);
   const [subFilter, setSubFilter] = useState<string>('all');
   const [bookFilter, setBookFilter] = useState<string>('all');
   const [listeningKey, setListeningKey] = useState<string | null>(null);
@@ -43,7 +45,7 @@ export const MasteredBankPage: React.FC = () => {
   }, [entries]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     return entries.filter((e) => {
       if (subFilter !== 'all' && e.subspecialty !== subFilter) return false;
       if (bookFilter !== 'all' && e.sourceBook !== bookFilter) return false;
@@ -53,7 +55,12 @@ export const MasteredBankPage: React.FC = () => {
       }
       return true;
     });
-  }, [entries, subFilter, bookFilter, query]);
+  }, [entries, subFilter, bookFilter, deferredQuery]);
+
+  const visibleEntries = useMemo(
+    () => filtered.slice(0, visibleLimit),
+    [filtered, visibleLimit]
+  );
 
   const handlePronounce = (termKey: string, term: string) => {
     setListeningKey(termKey);
@@ -160,8 +167,9 @@ export const MasteredBankPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="grid-2">
-          {filtered.map((item) => {
+        <div className="stack-md">
+          <div className="grid-2">
+            {visibleEntries.map((item) => {
             const pr = pronResults[item.termKey];
             const recUrl = recordedUrls[item.termKey];
             return (
@@ -254,6 +262,17 @@ export const MasteredBankPage: React.FC = () => {
               </div>
             );
           })}
+          </div>
+          {filtered.length > visibleLimit && (
+            <div style={{ textAlign: 'center' }}>
+              <button
+                className="btn btn-sm btn-soft"
+                onClick={() => setVisibleLimit((n) => n + 60)}
+              >
+                Hiển thị thêm (+60) · Đang xem {visibleEntries.length}/{filtered.length} thuật ngữ
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

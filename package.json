@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "validate:lessons": "node scripts/validate-lessons.mjs",
+    "prebuild": "npm run validate:lessons",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },

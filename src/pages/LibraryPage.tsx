@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   Check,
@@ -9,6 +9,8 @@ import {
   Copy,
   Download,
   Edit3,
+  Eye,
+  EyeOff,
   FileJson,
   FolderUp,
   HelpCircle,
@@ -16,6 +18,7 @@ import {
   RefreshCw,
   RotateCcw,
   Search,
+  ShieldCheck,
   Tag,
   Trash2,
   Upload,
@@ -25,7 +28,7 @@ import { useApp } from '../context/AppContext';
 import { LessonPack } from '../types/schema';
 import {
   APPS_SCRIPT_CODE_TEMPLATE,
-  isOfficialAppsScriptHost,
+  diagnoseAppsScriptUrl,
   isValidAppsScriptUrl,
 } from '../utils/cloudSync';
 import { normalizeLessonInput } from '../utils/normalizer';
@@ -200,6 +203,47 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
   } = useApp();
 
   const [copiedScript, setCopiedScript] = useState(false);
+
+  // Protected Apps Script Web App URL state (masking + overwrite confirmation)
+  const [syncUrlDraft, setSyncUrlDraft] = useState(prefs.appsScriptSync.url);
+  const [showSyncUrl, setShowSyncUrl] = useState(!prefs.appsScriptSync.url);
+  const [pendingOverwriteConfirm, setPendingOverwriteConfirm] = useState(false);
+
+  useEffect(() => {
+    setSyncUrlDraft(prefs.appsScriptSync.url);
+    setPendingOverwriteConfirm(false);
+  }, [prefs.appsScriptSync.url]);
+
+  const draftUrlDiag = useMemo(() => diagnoseAppsScriptUrl(syncUrlDraft), [syncUrlDraft]);
+  const savedUrlDiag = useMemo(
+    () => diagnoseAppsScriptUrl(prefs.appsScriptSync.url),
+    [prefs.appsScriptSync.url]
+  );
+  const hasUnsavedUrlChange = syncUrlDraft.trim() !== prefs.appsScriptSync.url.trim();
+
+  const handleRequestSaveSyncUrl = () => {
+    const trimmed = syncUrlDraft.trim();
+    if (trimmed && !draftUrlDiag.valid) {
+      showToast(draftUrlDiag.message);
+      return;
+    }
+    const existing = prefs.appsScriptSync.url.trim();
+    if (existing && existing !== trimmed) {
+      setPendingOverwriteConfirm(true);
+      return;
+    }
+    updateAppsScriptSync({ url: trimmed });
+    if (trimmed) setShowSyncUrl(false);
+    showToast(trimmed ? 'Đã lưu Apps Script Web App URL!' : 'Đã xóa Web App URL.');
+  };
+
+  const handleConfirmOverwriteSyncUrl = () => {
+    const trimmed = syncUrlDraft.trim();
+    updateAppsScriptSync({ url: trimmed });
+    setPendingOverwriteConfirm(false);
+    if (trimmed) setShowSyncUrl(false);
+    showToast(trimmed ? 'Đã cập nhật Apps Script Web App URL mới!' : 'Đã xóa Web App URL.');
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const backupInputRef = useRef<HTMLInputElement>(null);
@@ -878,34 +922,108 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
               htmlFor="apps-script-url-input"
               style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)' }}
             >
-              GOOGLE APPS SCRIPT WEB APP URL (HTTPS)
+              GOOGLE APPS SCRIPT WEB APP URL (HTTPS · BẮT BUỘC /EXEC)
             </label>
-            {prefs.appsScriptSync.url && (
-              <span
-                className={`badge ${
-                  isOfficialAppsScriptHost(prefs.appsScriptSync.url)
-                    ? 'badge-success'
-                    : isValidAppsScriptUrl(prefs.appsScriptSync.url)
-                      ? 'badge-warning'
-                      : 'badge-danger'
-                }`}
+            <div className="flex-row" style={{ gap: 6 }}>
+              {draftUrlDiag.level !== 'idle' && (
+                <span
+                  className={`badge ${
+                    draftUrlDiag.level === 'ok'
+                      ? 'badge-success'
+                      : draftUrlDiag.level === 'warning'
+                        ? 'badge-warning'
+                        : 'badge-danger'
+                  }`}
+                >
+                  {draftUrlDiag.level === 'ok'
+                    ? draftUrlDiag.message
+                    : draftUrlDiag.level === 'warning'
+                      ? 'Cần kiểm tra endpoint'
+                      : 'URL chưa hợp lệ'}
+                </span>
+              )}
+              <button
+                type="button"
+                className="btn btn-sm"
+                onClick={() => setShowSyncUrl((v) => !v)}
+                title={showSyncUrl ? 'Ẩn URL đồng bộ để bảo mật' : 'Hiện URL đồng bộ'}
               >
-                {isOfficialAppsScriptHost(prefs.appsScriptSync.url)
-                  ? '✓ URL Apps Script hợp lệ'
-                  : isValidAppsScriptUrl(prefs.appsScriptSync.url)
-                    ? 'HTTPS tùy chỉnh'
-                    : 'URL phải bắt đầu bằng https://'}
-              </span>
-            )}
+                {showSyncUrl ? <EyeOff size={14} /> : <Eye size={14} />}{' '}
+                {showSyncUrl ? 'Ẩn URL' : 'Hiện URL'}
+              </button>
+            </div>
           </div>
-          <input
-            id="apps-script-url-input"
-            className="input mono"
-            style={{ fontSize: '0.84rem' }}
-            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
-            value={prefs.appsScriptSync.url}
-            onChange={(e) => updateAppsScriptSync({ url: e.target.value })}
-          />
+
+          <div className="flex-row flex-wrap" style={{ gap: 8 }}>
+            <input
+              id="apps-script-url-input"
+              type={showSyncUrl ? 'text' : 'password'}
+              autoComplete="off"
+              spellCheck={false}
+              className="input mono"
+              style={{ fontSize: '0.84rem', flex: 1, minWidth: 240 }}
+              placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+              value={syncUrlDraft}
+              onChange={(e) => {
+                setSyncUrlDraft(e.target.value);
+                setPendingOverwriteConfirm(false);
+              }}
+            />
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              disabled={!hasUnsavedUrlChange || (syncUrlDraft.trim() !== '' && !draftUrlDiag.valid)}
+              onClick={handleRequestSaveSyncUrl}
+            >
+              <ShieldCheck size={14} />{' '}
+              {prefs.appsScriptSync.url ? 'Cập nhật URL' : 'Lưu URL'}
+            </button>
+          </div>
+
+          {(draftUrlDiag.level === 'error' || draftUrlDiag.level === 'warning') && (
+            <div
+              className="card-subtle"
+              style={{
+                borderColor: draftUrlDiag.level === 'error' ? 'var(--danger)' : 'var(--warning)',
+                color: draftUrlDiag.level === 'error' ? 'var(--danger)' : 'var(--warning)',
+                fontSize: '0.82rem',
+              }}
+            >
+              <AlertTriangle size={14} style={{ verticalAlign: '-2px', marginRight: 6 }} />
+              {draftUrlDiag.message}
+            </div>
+          )}
+
+          {pendingOverwriteConfirm && (
+            <div
+              className="card-subtle flex-between flex-wrap"
+              style={{ borderColor: 'var(--warning)', fontSize: '0.84rem' }}
+            >
+              <span style={{ color: 'var(--warning)', fontWeight: 600 }}>
+                <AlertTriangle size={14} style={{ verticalAlign: '-2px', marginRight: 6 }} />
+                Xác nhận ghi đè Apps Script Web App URL đồng bộ hiện tại?
+              </span>
+              <div className="flex-row" style={{ gap: 6 }}>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-primary"
+                  onClick={handleConfirmOverwriteSyncUrl}
+                >
+                  Xác nhận ghi đè
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm"
+                  onClick={() => {
+                    setSyncUrlDraft(prefs.appsScriptSync.url);
+                    setPendingOverwriteConfirm(false);
+                  }}
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <label className="flex-row" style={{ fontSize: '0.86rem', cursor: 'pointer' }}>
@@ -926,6 +1044,8 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
             disabled={
               syncStatus === 'pushing' ||
               syncStatus === 'pulling' ||
+              hasUnsavedUrlChange ||
+              !savedUrlDiag.valid ||
               !isValidAppsScriptUrl(prefs.appsScriptSync.url)
             }
             onClick={() => void pushToCloud(false)}
@@ -939,6 +1059,8 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
             disabled={
               syncStatus === 'pushing' ||
               syncStatus === 'pulling' ||
+              hasUnsavedUrlChange ||
+              !savedUrlDiag.valid ||
               !isValidAppsScriptUrl(prefs.appsScriptSync.url)
             }
             onClick={() => void pullFromCloud(true)}
@@ -952,6 +1074,8 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
             disabled={
               syncStatus === 'pushing' ||
               syncStatus === 'pulling' ||
+              hasUnsavedUrlChange ||
+              !savedUrlDiag.valid ||
               !isValidAppsScriptUrl(prefs.appsScriptSync.url)
             }
             onClick={() => void pullFromCloud(false)}

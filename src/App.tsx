@@ -1,14 +1,26 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { Layout, RouteKey } from './components/Layout';
 import { AppProvider } from './context/AppContext';
 import { HomePage } from './pages/HomePage';
-import { LessonDetailPage } from './pages/LessonDetailPage';
-import { LessonsPage } from './pages/LessonsPage';
-import { LibraryPage } from './pages/LibraryPage';
-import { MasteredBankPage } from './pages/MasteredBankPage';
-import { ReviewPage } from './pages/ReviewPage';
 import { isFramedByAnotherPage } from './utils/security';
+
+// Route-level code splitting for faster initial paint & smaller entry bundle
+const LessonsPage = lazy(() =>
+  import('./pages/LessonsPage').then((m) => ({ default: m.LessonsPage }))
+);
+const LessonDetailPage = lazy(() =>
+  import('./pages/LessonDetailPage').then((m) => ({ default: m.LessonDetailPage }))
+);
+const ReviewPage = lazy(() =>
+  import('./pages/ReviewPage').then((m) => ({ default: m.ReviewPage }))
+);
+const MasteredBankPage = lazy(() =>
+  import('./pages/MasteredBankPage').then((m) => ({ default: m.MasteredBankPage }))
+);
+const LibraryPage = lazy(() =>
+  import('./pages/LibraryPage').then((m) => ({ default: m.LibraryPage }))
+);
 
 function parseHash(rawHash: string): { route: RouteKey; param?: string } {
   const clean = rawHash.replace(/^#\/?/, '').trim();
@@ -22,6 +34,12 @@ function parseHash(rawHash: string): { route: RouteKey; param?: string } {
   if (clean === 'library') return { route: 'library' };
   return { route: 'home' };
 }
+
+const RouteFallback: React.FC = () => (
+  <div className="card" style={{ textAlign: 'center', padding: 36, color: 'var(--text-muted)' }}>
+    Đang tải không gian học...
+  </div>
+);
 
 const RouterView: React.FC = () => {
   const [hash, setHash] = useState<string>(() => window.location.hash || '#/home');
@@ -45,12 +63,16 @@ const RouterView: React.FC = () => {
 
   return (
     <Layout currentRoute={route} navigate={navigate}>
-      {route === 'home' && <HomePage navigate={navigate} />}
-      {route === 'lessons' && <LessonsPage navigate={navigate} />}
-      {route === 'lesson' && param && <LessonDetailPage lessonId={param} navigate={navigate} />}
-      {route === 'review' && <ReviewPage navigate={navigate} />}
-      {route === 'mastered' && <MasteredBankPage />}
-      {route === 'library' && <LibraryPage navigate={navigate} />}
+      <Suspense fallback={<RouteFallback />}>
+        {route === 'home' && <HomePage navigate={navigate} />}
+        {route === 'lessons' && <LessonsPage navigate={navigate} />}
+        {route === 'lesson' && param && (
+          <LessonDetailPage lessonId={param} navigate={navigate} />
+        )}
+        {route === 'review' && <ReviewPage navigate={navigate} />}
+        {route === 'mastered' && <MasteredBankPage />}
+        {route === 'library' && <LibraryPage navigate={navigate} />}
+      </Suspense>
     </Layout>
   );
 };
@@ -74,7 +96,8 @@ export const App: React.FC = () => {
           <ShieldAlert size={40} style={{ color: '#f87171', margin: '0 auto' }} />
           <h2 style={{ margin: 0 }}>Chặn nhúng khung (Anti-Clickjacking)</h2>
           <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.92rem' }}>
-            Vì lý do bảo mật, <strong>RadEng v4.0</strong> không cho phép trang web khác nhúng ứng dụng này vào trong <code className="mono">&lt;iframe&gt;</code>.
+            Vì lý do bảo mật, <strong>RadEng v4.0</strong> không cho phép trang web khác nhúng ứng
+            dụng này vào trong <code className="mono">&lt;iframe&gt;</code>.
           </p>
           <a
             href={window.location.href}
