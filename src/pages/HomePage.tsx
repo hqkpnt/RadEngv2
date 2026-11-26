@@ -78,7 +78,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
         <div className="stack-sm" style={{ maxWidth: 680 }}>
           <div className="flex-row flex-wrap">
             <span className="badge badge-accent">
-              <Activity size={14} /> RadDSA Studio · Chuyên sâu CĐHA & Điện quang can thiệp
+              <Activity size={14} /> RadEng v4.0 · Chuyên sâu CĐHA & Điện quang can thiệp
             </span>
             <span className="badge">{subspecialties.length} phân môn</span>
             <span className="badge">{lessons.length} gói bài học</span>

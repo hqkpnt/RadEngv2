@@ -1,4 +1,4 @@
-name: Deploy RadDSA Studio to GitHub Pages
+name: Deploy RadEng v4.0 to GitHub Pages
 
 on:
   push:

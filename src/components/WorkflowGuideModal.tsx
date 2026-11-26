@@ -23,7 +23,7 @@ export const WorkflowGuideModal: React.FC = () => {
 
   const geminiPrompt = useMemo(() => {
     return `Bạn là chuyên gia Chẩn đoán hình ảnh & Điện quang can thiệp (DSA) kiêm giảng viên tiếng Anh y khoa học thuật.
-Hãy đọc kỹ chương sách / tài liệu đính kèm và trích xuất thành ĐÚNG 1 tệp JSON hợp lệ (KHÔNG thêm văn bản giải thích ngoài khối JSON) theo chuẩn RadDSA schemaVersion: 2 dưới đây.
+Hãy đọc kỹ chương sách / tài liệu đính kèm và trích xuất thành ĐÚNG 1 tệp JSON hợp lệ (KHÔNG thêm văn bản giải thích ngoài khối JSON) theo chuẩn RadEng v4.0 (schemaVersion: 2) dưới đây.
 
 THÔNG TIN NGỮ CẢNH:
 - Phân môn (subspecialty): "${promptSub}" (${selectedSubLabel})

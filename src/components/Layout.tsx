@@ -95,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentRoute, navigate, children
                 <Activity size={19} />
               </div>
               <div>
-                <div className="brand-title">RadDSA.</div>
+                <div className="brand-title">RadEng v4.0</div>
                 <div className="brand-sub">CĐHA & Điện quang can thiệp</div>
               </div>
             </button>
@@ -369,7 +369,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentRoute, navigate, children
         <footer className="app-footer">
           <div className="footer-inner">
             <span>
-              <strong>RadDSA Studio</strong> · Tiếng Anh CĐHA & Điện quang can thiệp · Bảo vệ chống XSS & Clickjacking
+              <strong>RadEng v4.0</strong> · Cùng học tiếng Anh chuyên ngành CĐHA và DSA với mình nhé!
             </span>
             <div className="flex-row">
               <button className="btn btn-sm" onClick={() => setGuideOpen(true)}>

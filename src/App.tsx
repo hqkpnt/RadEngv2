@@ -74,7 +74,7 @@ export const App: React.FC = () => {
           <ShieldAlert size={40} style={{ color: '#f87171', margin: '0 auto' }} />
           <h2 style={{ margin: 0 }}>Chặn nhúng khung (Anti-Clickjacking)</h2>
           <p style={{ margin: 0, color: '#cbd5e1', fontSize: '0.92rem' }}>
-            Vì lý do bảo mật, <strong>RadDSA Studio</strong> không cho phép trang web khác nhúng ứng dụng này vào trong <code className="mono">&lt;iframe&gt;</code>.
+            Vì lý do bảo mật, <strong>RadEng v4.0</strong> không cho phép trang web khác nhúng ứng dụng này vào trong <code className="mono">&lt;iframe&gt;</code>.
           </p>
           <a
             href={window.location.href}
