@@ -55,16 +55,17 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
   }, [lessons, state.lessonProgress]);
 
   const completedSkillsTotal = useMemo(() => {
+    const coreSkills = ['vocabulary', 'grammar', 'reading'] as const;
     let done = 0;
     lessons.forEach((l) => {
       const prog = state.lessonProgress[l.id];
       if (!prog) return;
-      done += Object.values(prog.skillsCompleted).filter(Boolean).length;
+      done += coreSkills.filter((k) => prog.skillsCompleted[k]).length;
     });
     return done;
   }, [lessons, state.lessonProgress]);
 
-  const totalSkillsPossible = lessons.length * 6;
+  const totalSkillsPossible = lessons.length * 3;
 
   return (
     <div className="stack-lg">
@@ -87,7 +88,7 @@ export const HomePage: React.FC<HomePageProps> = ({ navigate }) => {
             Làm chủ tiếng Anh <span className="gradient-text">CĐHA & DSA</span> trực tiếp từ sách chuyên ngành.
           </h1>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-            Biên soạn gói bài 6 kỹ năng bằng Gemini, nạp nhanh file <code className="mono">.json</code> theo từng phân môn & đầu sách, luyện nghe thuyết minh chuẩn Discovery, đọc phim song ngữ và ôn thẻ SRS bền vững.
+            Tập trung 3 trụ cột cốt lõi: <strong>Vocabulary · Grammar · Reading</strong>. Biên soạn gói bài bằng Gemini, nạp nhanh file <code className="mono">.json</code> theo từng phân môn &amp; đầu sách, đọc hiểu song ngữ kiểu IELTS và ôn thẻ SRS (SM-2) bền vững.
           </p>
         </div>
 

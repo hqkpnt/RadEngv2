@@ -21,14 +21,7 @@ interface LessonsPageProps {
   navigate: (hash: string) => void;
 }
 
-const SKILLS_ORDER: SkillKey[] = [
-  'vocabulary',
-  'grammar',
-  'listening',
-  'reading',
-  'writing',
-  'speaking',
-];
+const SKILLS_ORDER: SkillKey[] = ['vocabulary', 'grammar', 'reading'];
 
 export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
   const {
@@ -68,11 +61,11 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
 
       const prog = state.lessonProgress[l.id];
       const doneCount = prog
-        ? Object.values(prog.skillsCompleted).filter(Boolean).length
+        ? SKILLS_ORDER.filter((k) => prog.skillsCompleted[k]).length
         : 0;
       if (statusFilter === 'todo' && doneCount > 0) return false;
-      if (statusFilter === 'in_progress' && (doneCount === 0 || doneCount === 6)) return false;
-      if (statusFilter === 'done' && doneCount < 6) return false;
+      if (statusFilter === 'in_progress' && (doneCount === 0 || doneCount === 3)) return false;
+      if (statusFilter === 'done' && doneCount < 3) return false;
 
       if (q) {
         const vocabText = l.vocabulary.map((v) => `${v.term} ${v.meaningVi}`).join(' ');
@@ -267,7 +260,7 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
             <option value="all">Tất cả trạng thái</option>
             <option value="todo">Chưa bắt đầu</option>
             <option value="in_progress">Đang học</option>
-            <option value="done">Hoàn thành đủ 6 kỹ năng</option>
+            <option value="done">Hoàn thành đủ 3 kỹ năng</option>
           </select>
         </div>
 
@@ -279,9 +272,9 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
       {/* Lessons List */}
       <section className="stack-md">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.45rem' }}>Thư viện Bài học CĐHA & DSA</h1>
+          <h1 style={{ margin: 0, fontSize: '1.45rem' }}>Thư viện Bài học CĐHA &amp; DSA</h1>
           <p style={{ margin: '4px 0 0', fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-            Mỗi gói bài học chuẩn hóa đầy đủ 6 kỹ năng: Vocabulary · Grammar · Listening · Reading · Writing · Speaking.
+            Mỗi gói bài học tập trung 3 kỹ năng cốt lõi: Vocabulary · Grammar · Reading.
           </p>
         </div>
 
@@ -378,7 +371,7 @@ export const LessonsPage: React.FC<LessonsPageProps> = ({ navigate }) => {
                       className="btn btn-primary"
                       onClick={() => navigate(`#/lesson/${encodeURIComponent(lesson.id)}`)}
                     >
-                      {doneSkills > 0 ? `Tiếp tục (${doneSkills}/6)` : 'Vào học 6 kỹ năng'}{' '}
+                      {doneSkills > 0 ? `Tiếp tục (${doneSkills}/3)` : 'Vào học 3 kỹ năng'}{' '}
                       <ArrowRight size={15} />
                     </button>
                   </div>

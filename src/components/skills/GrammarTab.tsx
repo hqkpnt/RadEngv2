@@ -152,7 +152,6 @@ export const GrammarTab: React.FC<GrammarTabProps> = ({ lesson, timedMode }) => 
                     onClick={() =>
                       speakText(point.sourceSentence.en, prefs.ttsRate, prefs.ttsVoice, {
                         voiceName: prefs.ttsVoiceName,
-                        style: prefs.narrationStyle,
                       })
                     }
                   >

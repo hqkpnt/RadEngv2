@@ -9,11 +9,9 @@ import {
   FileJson,
   Layers,
   Maximize2,
-  Mic,
   Minimize2,
   Plus,
   RotateCcw,
-  Square,
   Trash2,
   Volume2,
   X,
@@ -21,13 +19,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { LessonPack, VocabItem } from '../../types/schema';
 import { sanitizePlainText } from '../../utils/security';
-import {
-  comparePronunciation,
-  PronunciationResult,
-  speakText,
-  startOfflineAudioRecording,
-  startSpeechRecognition,
-} from '../../utils/speech';
+import { speakText } from '../../utils/speech';
 
 interface VocabularyTabProps {
   lesson: LessonPack;
@@ -98,14 +90,6 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
   const [zoomed, setZoomed] = useState(false);
   const [seenIds, setSeenIds] = useState<string[]>([]);
 
-  // Pronunciation state (resilient: SpeechRecognition + offline MediaRecorder fallback)
-  const [listeningKey, setListeningKey] = useState<string | null>(null);
-  const [offlineFallbackKey, setOfflineFallbackKey] = useState<string | null>(null);
-  const [recordingKey, setRecordingKey] = useState<string | null>(null);
-  const [stopRecFn, setStopRecFn] = useState<(() => void) | null>(null);
-  const [recordedUrls, setRecordedUrls] = useState<Record<string, string>>({});
-  const [pronResults, setPronResults] = useState<Record<string, PronunciationResult>>({});
-
   // Timed Drill state
   const [drillIdx, setDrillIdx] = useState(0);
   const [drillScore, setDrillScore] = useState(0);
@@ -127,7 +111,6 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
         e.preventDefault();
         speakText(currentCard.term, prefs.ttsRate, prefs.ttsVoice, {
           voiceName: prefs.ttsVoiceName,
-          style: prefs.narrationStyle,
         });
       }
     };
@@ -158,46 +141,6 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
     const id = window.setInterval(() => setSecLeft((s) => s - 1), 1000);
     return () => window.clearInterval(id);
   }, [mode, drillFinished, drillSelected, secLeft]);
-
-  const handlePronounce = (termKey: string, term: string) => {
-    setListeningKey(termKey);
-    startSpeechRecognition(prefs.ttsVoice, {
-      onResult: (transcript) => {
-        setPronResults((prev) => ({
-          ...prev,
-          [termKey]: comparePronunciation(term, transcript),
-        }));
-      },
-      onNetworkError: () => {
-        setListeningKey(null);
-        setOfflineFallbackKey(termKey);
-        showToast('Đã chuyển sang Ghi âm cục bộ (Offline) do trình duyệt không kết nối máy chủ Speech.');
-      },
-      onError: (msg) => showToast(msg),
-      onEnd: () => setListeningKey(null),
-    });
-  };
-
-  const handleOfflineRecord = async (termKey: string) => {
-    if (recordingKey === termKey && stopRecFn) {
-      stopRecFn();
-      setRecordingKey(null);
-      setStopRecFn(null);
-      return;
-    }
-    setRecordingKey(termKey);
-    const stop = await startOfflineAudioRecording({
-      onStop: (url) => {
-        setRecordedUrls((prev) => ({ ...prev, [termKey]: url }));
-        showToast('Đã ghi âm xong! Nhấn Play để nghe lại giọng đọc của bạn.');
-      },
-      onError: (msg) => {
-        setRecordingKey(null);
-        showToast(msg);
-      },
-    });
-    setStopRecFn(() => stop);
-  };
 
   const handleSaveManualCard = (e: React.FormEvent) => {
     e.preventDefault();
@@ -451,9 +394,6 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
             <div className="grid-2">
               {items.map((item) => {
                 const isMastered = Boolean(state.masteredBank[item.termKey]);
-                const pr = pronResults[item.termKey];
-                const recUrl = recordedUrls[item.termKey];
-                const showOfflineRec = offlineFallbackKey === item.termKey || Boolean(recUrl);
                 return (
                   <motion.div
                     key={item.termKey}
@@ -503,54 +443,16 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
                       </div>
                     )}
 
-                    {pr && (
-                      <div className="token-strip" style={{ padding: '8px 10px' }}>
-                        <span className={`badge ${pr.accuracy >= 80 ? 'badge-success' : 'badge-warning'}`}>
-                          Khớp {pr.accuracy}%
-                        </span>
-                        {pr.tokens.map((t, i) => (
-                          <span key={i} className={`tok ${t.matched ? 'tok-correct' : 'tok-wrong'}`}>
-                            {t.word}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {showOfflineRec && (
-                      <div className="card-subtle stack-sm" style={{ padding: '8px 10px' }}>
-                        <div className="flex-between flex-wrap" style={{ fontSize: '0.8rem' }}>
-                          <span style={{ color: 'var(--text-secondary)' }}>
-                            Chế độ Ghi âm cục bộ (Offline — không cần cloud):
-                          </span>
-                          <button
-                            className={`btn btn-sm ${recordingKey === item.termKey ? 'btn-danger' : 'btn-soft'}`}
-                            onClick={() => handleOfflineRecord(item.termKey)}
-                          >
-                            {recordingKey === item.termKey ? <Square size={12} /> : <Mic size={13} />}
-                            {recordingKey === item.termKey ? 'Dừng ghi' : 'Ghi âm giọng đọc'}
-                          </button>
-                        </div>
-                        {recUrl && <audio controls src={recUrl} style={{ width: '100%', height: 34 }} />}
-                      </div>
-                    )}
-
                     <div className="flex-row flex-wrap" style={{ marginTop: 4 }}>
                       <button
                         className="btn btn-sm btn-soft"
                         onClick={() =>
                           speakText(item.term, prefs.ttsRate, prefs.ttsVoice, {
                             voiceName: prefs.ttsVoiceName,
-                            style: prefs.narrationStyle,
                           })
                         }
                       >
                         <Volume2 size={14} /> Nghe
-                      </button>
-                      <button
-                        className={`btn btn-sm ${listeningKey === item.termKey ? 'btn-danger' : ''}`}
-                        onClick={() => handlePronounce(item.termKey, item.term)}
-                      >
-                        <Mic size={14} /> {listeningKey === item.termKey ? 'Đang nghe...' : 'Phát âm'}
                       </button>
                       <button
                         className="btn btn-sm"
@@ -684,13 +586,12 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
               </motion.div>
 
               <div className="flex-between flex-wrap">
-                <div className="flex-row">
+                <div className="flex-row flex-wrap">
                   <button
                     className="btn btn-sm btn-soft"
                     onClick={() =>
                       speakText(currentCard.term, prefs.ttsRate, prefs.ttsVoice, {
                         voiceName: prefs.ttsVoiceName,
-                        style: prefs.narrationStyle,
                       })
                     }
                   >

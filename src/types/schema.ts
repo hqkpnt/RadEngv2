@@ -1,10 +1,4 @@
-export type SkillKey =
-  | 'vocabulary'
-  | 'grammar'
-  | 'listening'
-  | 'reading'
-  | 'writing'
-  | 'speaking';
+export type SkillKey = 'vocabulary' | 'grammar' | 'reading';
 
 export interface SubspecialtyDef {
   id: string;
@@ -22,10 +16,7 @@ export const DEFAULT_SUBSPECIALTIES: SubspecialtyDef[] = [
 export const SKILL_LABELS: Record<SkillKey, { label: string; short: string }> = {
   vocabulary: { label: 'Vocabulary', short: 'V' },
   grammar: { label: 'Grammar', short: 'G' },
-  listening: { label: 'Listening', short: 'L' },
   reading: { label: 'Reading', short: 'R' },
-  writing: { label: 'Writing', short: 'W' },
-  speaking: { label: 'Speaking', short: 'S' },
 };
 
 export interface LessonMeta {
@@ -49,7 +40,6 @@ export interface VocabItem {
   noteVi: string;
   exampleEn: string;
   exampleVi: string;
-  audioUrl?: string;
   isCustom?: boolean;
 }
 
@@ -72,36 +62,6 @@ export interface GrammarPoint {
     vi: string;
   };
   quickExercises: GrammarExercise[];
-}
-
-export interface ListeningSentence {
-  id: string;
-  en: string;
-  vi: string;
-}
-
-export interface ListeningGapFill {
-  id: string;
-  sentence: string;
-  answer: string;
-  hint?: string;
-}
-
-export interface ListeningMcq {
-  id: string;
-  question: string;
-  options: string[];
-  answer: string;
-  explanationVi: string;
-}
-
-export interface ListeningSection {
-  title: string;
-  audioUrl?: string;
-  notesTemplate?: string[];
-  transcriptSentences: ListeningSentence[];
-  gapFill: ListeningGapFill[];
-  mcq: ListeningMcq[];
 }
 
 export interface ReadingParagraph {
@@ -164,62 +124,6 @@ export interface ReadingSection {
   };
 }
 
-export interface WritingParaphraseTask {
-  id: string;
-  type: 'paraphrase' | 'translation';
-  prompt: string;
-  targetKeywords: string[];
-  modelAnswer: string;
-  noteVi: string;
-}
-
-export interface WritingEssayTask {
-  prompt: string;
-  minWords: number;
-  recommendedMinutes: number;
-  models: {
-    band7: string;
-    band8: string;
-    band9: string;
-  };
-}
-
-export interface WritingSection {
-  paraphraseTasks: WritingParaphraseTask[];
-  essayTask: WritingEssayTask;
-}
-
-export interface SpeakingPrompt {
-  question: string;
-  sampleAnswer: string;
-  hintVi?: string;
-}
-
-export interface SpeakingStage {
-  stage: 1 | 2 | 3;
-  title: string;
-  prepSeconds?: number;
-  speakSeconds?: number;
-  cueCard?: string;
-  bulletPoints?: string[];
-  sampleAnswer?: string;
-  prompts: SpeakingPrompt[];
-}
-
-export interface ShadowingItem {
-  id: string;
-  en: string;
-  vi: string;
-}
-
-export interface SpeakingSection {
-  stages: SpeakingStage[];
-  shadowing: {
-    simple: ShadowingItem[];
-    complex: ShadowingItem[];
-  };
-}
-
 export interface LessonPack {
   schemaVersion: 2;
   id: string;
@@ -227,10 +131,7 @@ export interface LessonPack {
   meta: LessonMeta;
   vocabulary: VocabItem[];
   grammar: GrammarPoint[];
-  listening: ListeningSection;
   reading: ReadingSection;
-  writing: WritingSection;
-  speaking: SpeakingSection;
 }
 
 export interface SrsFolder {
@@ -273,13 +174,6 @@ export interface MasteredEntry {
 export interface LessonProgress {
   skillsCompleted: Record<SkillKey, boolean>;
   stars: number;
-  writingDraft: string;
-  writingParaphraseDrafts?: Record<string, string>;
-  writingRubric?: Record<number, boolean>;
-  speakingNotes?: Record<string, string>;
-  speakingRubric?: Record<number, boolean>;
-  listeningFlaggedIds?: string[];
-  paraphraseDoneIds: string[];
   lastOpenedAt: number;
 }
 
@@ -315,7 +209,6 @@ export interface AppPreferences {
   ttsRate: number;
   ttsVoice: 'en-US' | 'en-GB';
   ttsVoiceName: string; // '' = auto-best natural voice
-  narrationStyle: 'discovery' | 'standard';
   subspecialties: SubspecialtyDef[];
   appsScriptSync: AppsScriptSyncConfig;
   reminder: {

@@ -9,11 +9,8 @@ import {
 } from 'lucide-react';
 import { NotebookDrawer } from '../components/NotebookDrawer';
 import { GrammarTab } from '../components/skills/GrammarTab';
-import { ListeningTab } from '../components/skills/ListeningTab';
 import { ReadingTab } from '../components/skills/ReadingTab';
-import { SpeakingTab } from '../components/skills/SpeakingTab';
 import { VocabularyTab } from '../components/skills/VocabularyTab';
-import { WritingTab } from '../components/skills/WritingTab';
 import { useApp } from '../context/AppContext';
 import { SKILL_LABELS, SkillKey } from '../types/schema';
 
@@ -22,14 +19,7 @@ interface LessonDetailPageProps {
   navigate: (hash: string) => void;
 }
 
-const SKILLS: SkillKey[] = [
-  'vocabulary',
-  'grammar',
-  'listening',
-  'reading',
-  'writing',
-  'speaking',
-];
+const SKILLS: SkillKey[] = ['vocabulary', 'grammar', 'reading'];
 
 export const LessonDetailPage: React.FC<LessonDetailPageProps> = ({ lessonId, navigate }) => {
   const { lessons, state, getSubspecialtyLabel, zenMode, setZenMode } = useApp();
@@ -106,8 +96,8 @@ export const LessonDetailPage: React.FC<LessonDetailPageProps> = ({ lessonId, na
           )}
         </div>
 
-        {/* 6-Skill Animated Tab Bar */}
-        <div className="skill-tabs" role="tablist" aria-label="6 kỹ năng bài học">
+        {/* 3-Skill Animated Tab Bar */}
+        <div className="skill-tabs" role="tablist" aria-label="3 kỹ năng bài học">
           {SKILLS.map((sk) => {
             const done = Boolean(prog?.skillsCompleted[sk]);
             const active = activeSkill === sk;
@@ -136,10 +126,7 @@ export const LessonDetailPage: React.FC<LessonDetailPageProps> = ({ lessonId, na
 
       {activeSkill === 'vocabulary' && <VocabularyTab lesson={lesson} timedMode={timedMode} />}
       {activeSkill === 'grammar' && <GrammarTab lesson={lesson} timedMode={timedMode} />}
-      {activeSkill === 'listening' && <ListeningTab lesson={lesson} />}
       {activeSkill === 'reading' && <ReadingTab lesson={lesson} timedMode={timedMode} />}
-      {activeSkill === 'writing' && <WritingTab lesson={lesson} />}
-      {activeSkill === 'speaking' && <SpeakingTab lesson={lesson} />}
 
       <NotebookDrawer
         open={notebookOpen}

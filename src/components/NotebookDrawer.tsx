@@ -151,7 +151,6 @@ export const NotebookDrawer: React.FC<NotebookDrawerProps> = ({
                         onClick={() =>
                           speakText(item.term, prefs.ttsRate, prefs.ttsVoice, {
                             voiceName: prefs.ttsVoiceName,
-                            style: prefs.narrationStyle,
                           })
                         }
                       >

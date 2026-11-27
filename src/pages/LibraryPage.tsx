@@ -73,29 +73,6 @@ const RADENG_V31_SAMPLE = {
       ],
     },
   ],
-  listening: {
-    title: 'Tumor Board Discussion: BCLC Stage B HCC',
-    notesTemplate: [
-      'Target lesion: 4.5 cm hypervascular HCC in segment VIII.',
-      'Delivery: Superselective DEB-TACE to stasis.',
-    ],
-    transcript:
-      'Contrast-enhanced MRI confirmed a hypervascular hepatocellular carcinoma in segment eight. Superselective catheterization minimizes non-target embolization.',
-    gapFill: [
-      {
-        sentence: 'Superselective catheterization minimizes _____ embolization.',
-        answer: 'non-target',
-        hint: 'ngoài đích',
-      },
-    ],
-    mcq: [
-      {
-        question: 'Which hepatic segment contains the target HCC lesion?',
-        options: ['Segment II', 'Segment IV', 'Segment VIII'],
-        answer: 'Segment VIII',
-      },
-    ],
-  },
   reading: {
     title: 'Dual Blood Supply of the Liver & Rationale for TACE',
     paragraphs: [
@@ -120,60 +97,6 @@ const RADENG_V31_SAMPLE = {
         evidenceParagraph: 'p1',
       },
     ],
-  },
-  writing: {
-    sentenceTasks: [
-      {
-        type: 'translation',
-        prompt:
-          'Vi ống thông được luồn siêu chọn lọc vào nhánh động mạch nuôi u ở hạ phân thùy VIII.',
-        keywords: ['microcatheter', 'superselectively', 'segment VIII'],
-        modelAnswer:
-          'A microcatheter was advanced superselectively into the segment VIII tumor-feeding artery.',
-      },
-    ],
-    essayTask: {
-      prompt: 'Summarize the vascular rationale and procedural endpoint for superselective TACE.',
-      minWords: 120,
-      band7: 'TACE relies on the dual blood supply of the liver to treat HCC selectively...',
-      band8:
-        'Exploiting the predominantly arterial supply of hepatocellular carcinoma, superselective TACE delivers concentrated therapy...',
-      band9:
-        'By leveraging the hemodynamic contrast between arterialized HCC lesions and portally perfused parenchyma...',
-    },
-  },
-  speaking: {
-    stage1: [
-      {
-        question: 'Why is superselective microcatheter placement critical during TACE?',
-        sampleAnswer:
-          'It maximizes drug concentration inside the tumor while preserving healthy liver function.',
-      },
-    ],
-    stage2: {
-      title: 'Present a BCLC-B HCC TACE Case',
-      cueCard: 'Describe arterial mapping and endpoint assessment for a segment VIII HCC.',
-      bulletPoints: [
-        'CT/MRI arterial hyperenhancement',
-        'Cone-beam CT confirmation',
-        'Near-stasis endpoint',
-      ],
-      sampleAnswer:
-        'This patient presented with a solitary 4.5 cm hypervascular segment VIII lesion...',
-    },
-    stage3: [
-      {
-        question: 'How does cone-beam CT improve technical success in interventional oncology?',
-        sampleAnswer:
-          'It identifies occult feeding vessels and confirms complete tumor coverage before embolization.',
-      },
-    ],
-    shadowing: {
-      simple: ['The hepatic artery / supplies most hepatocellular carcinomas.'],
-      complex: [
-        'Following cone-beam CT confirmation, / chemoembolization was delivered / to near-stasis.',
-      ],
-    },
   },
 };
 
@@ -707,9 +630,7 @@ export const LibraryPage: React.FC<LibraryPageProps> = ({ navigate }) => {
                   </div>
                 </div>
                 <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                  Vocab: {p.vocabulary.length} · Grammar: {p.grammar.length} điểm · Listening:{' '}
-                  {p.listening.transcriptSentences.length} câu · Reading: {p.reading.paragraphs.length} đoạn · Writing:{' '}
-                  {p.writing.paraphraseTasks.length} câu + Essay · Speaking: {p.speaking.stages.length} stages
+                  Vocabulary: {p.vocabulary.length} thuật ngữ · Grammar: {p.grammar.length} điểm · Reading: {p.reading.paragraphs.length} đoạn
                 </div>
               </div>
             ))}

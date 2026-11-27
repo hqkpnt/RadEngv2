@@ -71,13 +71,6 @@ interface AppContextValue {
   pullFromCloud: (force?: boolean) => Promise<'updated' | 'up_to_date' | 'error'>;
   addXp: (amount: number) => void;
   markSkillComplete: (lessonId: string, skill: SkillKey, bonusXp?: number, stars?: number) => void;
-  saveWritingDraft: (lessonId: string, text: string) => void;
-  saveParaphraseDraft: (lessonId: string, taskId: string, text: string) => void;
-  toggleWritingRubric: (lessonId: string, index: number) => void;
-  saveSpeakingNote: (lessonId: string, key: string, text: string) => void;
-  toggleSpeakingRubric: (lessonId: string, index: number) => void;
-  toggleListeningFlag: (lessonId: string, sentenceId: string) => void;
-  toggleParaphraseDone: (lessonId: string, taskId: string) => void;
   saveNotebook: (lessonId: string, content: string) => void;
   addLessonVocab: (lessonId: string, item: VocabItem, alsoAddToSrs?: boolean) => void;
   bulkAddLessonVocab: (lessonId: string, items: VocabItem[], alsoAddToSrs?: boolean) => number;
@@ -130,14 +123,9 @@ function emptyLessonProgress(): LessonProgress {
     skillsCompleted: {
       vocabulary: false,
       grammar: false,
-      listening: false,
       reading: false,
-      writing: false,
-      speaking: false,
     },
     stars: 0,
-    writingDraft: '',
-    paraphraseDoneIds: [],
     lastOpenedAt: Date.now(),
   };
 }
@@ -453,156 +441,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               ...cur,
               skillsCompleted: { ...cur.skillsCompleted, [skill]: true },
               stars: stars !== undefined ? Math.max(cur.stars, stars) : cur.stars,
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const saveWritingDraft = useCallback(
-    (lessonId: string, text: string) => {
-      const clean = sanitizePlainText(text, 30000);
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: { ...cur, writingDraft: clean, lastOpenedAt: Date.now() },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const saveParaphraseDraft = useCallback(
-    (lessonId: string, taskId: string, text: string) => {
-      const clean = sanitizePlainText(text, 3000);
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              writingParaphraseDrafts: {
-                ...(cur.writingParaphraseDrafts || {}),
-                [taskId]: clean,
-              },
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const toggleWritingRubric = useCallback(
-    (lessonId: string, index: number) => {
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        const currentMap = cur.writingRubric || {};
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              writingRubric: { ...currentMap, [index]: !currentMap[index] },
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const saveSpeakingNote = useCallback(
-    (lessonId: string, key: string, text: string) => {
-      const clean = sanitizePlainText(text, 5000);
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              speakingNotes: { ...(cur.speakingNotes || {}), [key]: clean },
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const toggleSpeakingRubric = useCallback(
-    (lessonId: string, index: number) => {
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        const currentMap = cur.speakingRubric || {};
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              speakingRubric: { ...currentMap, [index]: !currentMap[index] },
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const toggleListeningFlag = useCallback(
-    (lessonId: string, sentenceId: string) => {
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        const set = new Set(cur.listeningFlaggedIds || []);
-        if (set.has(sentenceId)) set.delete(sentenceId);
-        else set.add(sentenceId);
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              listeningFlaggedIds: Array.from(set),
-              lastOpenedAt: Date.now(),
-            },
-          },
-        };
-      });
-    },
-    [mutateState]
-  );
-
-  const toggleParaphraseDone = useCallback(
-    (lessonId: string, taskId: string) => {
-      mutateState((prev) => {
-        const cur = prev.lessonProgress[lessonId] || emptyLessonProgress();
-        const set = new Set(cur.paraphraseDoneIds);
-        if (set.has(taskId)) set.delete(taskId);
-        else set.add(taskId);
-        return {
-          ...prev,
-          lessonProgress: {
-            ...prev.lessonProgress,
-            [lessonId]: {
-              ...cur,
-              paraphraseDoneIds: Array.from(set),
               lastOpenedAt: Date.now(),
             },
           },
@@ -1426,13 +1264,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pullFromCloud,
         addXp,
         markSkillComplete,
-        saveWritingDraft,
-        saveParaphraseDraft,
-        toggleWritingRubric,
-        saveSpeakingNote,
-        toggleSpeakingRubric,
-        toggleListeningFlag,
-        toggleParaphraseDone,
         saveNotebook,
         addLessonVocab,
         bulkAddLessonVocab,

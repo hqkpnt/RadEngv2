@@ -96,30 +96,14 @@ for (const fileName of diskFiles) {
       : lesson.grammar && typeof lesson.grammar === 'object'
         ? [lesson.grammar]
         : [];
-    const listeningSentences = Array.isArray(lesson.listening?.transcriptSentences)
-      ? lesson.listening.transcriptSentences
-      : [];
     const readingParas = Array.isArray(lesson.reading?.paragraphs)
       ? lesson.reading.paragraphs
       : [];
-    const writingTasks = Array.isArray(lesson.writing?.paraphraseTasks)
-      ? lesson.writing.paraphraseTasks
-      : Array.isArray(lesson.writing?.sentenceTasks)
-        ? lesson.writing.sentenceTasks
-        : [];
-    const speakingStages = Array.isArray(lesson.speaking?.stages)
-      ? lesson.speaking.stages
-      : [];
 
-    if (
-      vocab.length === 0 &&
-      grammar.length === 0 &&
-      listeningSentences.length === 0 &&
-      readingParas.length === 0 &&
-      writingTasks.length === 0 &&
-      speakingStages.length === 0
-    ) {
-      errors.push(`${prefix} ("${title}"): Không có dữ liệu hợp lệ ở bất kỳ kỹ năng nào.`);
+    if (vocab.length === 0 && grammar.length === 0 && readingParas.length === 0) {
+      errors.push(
+        `${prefix} ("${title}"): Không có dữ liệu hợp lệ ở bất kỳ kỹ năng nào (vocabulary, grammar hoặc reading).`
+      );
     }
 
     const seenTermKeys = new Set();
@@ -135,17 +119,7 @@ for (const fileName of diskFiles) {
         }
         seenTermKeys.add(v.termKey);
       }
-      if (typeof v?.audioUrl === 'string' && /^\s*(javascript|vbscript|data):/i.test(v.audioUrl)) {
-        errors.push(`${prefix}: vocabulary[${vIdx}].audioUrl chứa giao thức không an toàn.`);
-      }
     });
-
-    if (
-      typeof lesson.listening?.audioUrl === 'string' &&
-      /^\s*(javascript|vbscript|data):/i.test(lesson.listening.audioUrl)
-    ) {
-      errors.push(`${prefix}: listening.audioUrl chứa giao thức không an toàn.`);
-    }
   });
 }
 

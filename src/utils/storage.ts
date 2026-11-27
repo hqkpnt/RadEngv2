@@ -73,7 +73,6 @@ export function getDefaultPreferences(): AppPreferences {
     ttsRate: 0.95,
     ttsVoice: 'en-US',
     ttsVoiceName: '',
-    narrationStyle: 'discovery',
     subspecialties: DEFAULT_SUBSPECIALTIES,
     appsScriptSync: {
       enabled: false,

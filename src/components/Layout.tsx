@@ -220,22 +220,8 @@ export const Layout: React.FC<LayoutProps> = ({ currentRoute, navigate, children
 
                     <div className="stack-sm">
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>
-                        PHONG CÁCH THUYẾT MINH LISTENING
+                        PHÁT ÂM TỪ VỰNG
                       </span>
-                      <div className="segmented">
-                        <button
-                          className={prefs.narrationStyle === 'discovery' ? 'active' : ''}
-                          onClick={() => updatePrefs({ narrationStyle: 'discovery' })}
-                        >
-                          Discovery (Nhấn nhá)
-                        </button>
-                        <button
-                          className={prefs.narrationStyle === 'standard' ? 'active' : ''}
-                          onClick={() => updatePrefs({ narrationStyle: 'standard' })}
-                        >
-                          Đọc chuẩn
-                        </button>
-                      </div>
                       <select
                         className="select"
                         style={{ padding: '6px 8px', fontSize: '0.8rem' }}

@@ -168,7 +168,6 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                 onClick={() =>
                   speakText(activeGlossary.term, prefs.ttsRate, prefs.ttsVoice, {
                     voiceName: prefs.ttsVoiceName,
-                    style: prefs.narrationStyle,
                   })
                 }
               >

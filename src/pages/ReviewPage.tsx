@@ -129,7 +129,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
     if (activeSessionCard && srs.autoSpeak && srs.reviewDirection === 'en_to_vi_recall') {
       speakText(activeSessionCard.front, prefs.ttsRate, prefs.ttsVoice, {
         voiceName: prefs.ttsVoiceName,
-        style: prefs.narrationStyle,
       });
     }
   }, [activeSessionCard?.id, srs.autoSpeak, srs.reviewDirection, prefs]);
@@ -292,7 +291,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
               onClick={() =>
                 speakText(activeSessionCard.front, 0.78, prefs.ttsVoice, {
                   voiceName: prefs.ttsVoiceName,
-                  style: prefs.narrationStyle,
                 })
               }
               title="Nghe chậm 0.78x"
@@ -338,7 +336,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                     if (srs.autoSpeak) {
                       speakText(activeSessionCard.front, prefs.ttsRate, prefs.ttsVoice, {
                         voiceName: prefs.ttsVoiceName,
-                        style: prefs.narrationStyle,
                       });
                     }
                   }}
@@ -388,7 +385,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                       onClick={() =>
                         speakText(activeSessionCard.front, prefs.ttsRate, prefs.ttsVoice, {
                           voiceName: prefs.ttsVoiceName,
-                          style: prefs.narrationStyle,
                         })
                       }
                     >
@@ -415,7 +411,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                   onClick={() =>
                     speakText(activeSessionCard.front, prefs.ttsRate, prefs.ttsVoice, {
                       voiceName: prefs.ttsVoiceName,
-                      style: prefs.narrationStyle,
                     })
                   }
                 >
@@ -898,7 +893,6 @@ export const ReviewPage: React.FC<ReviewPageProps> = ({ navigate }) => {
                                 onClick={() =>
                                   speakText(card.front, prefs.ttsRate, prefs.ttsVoice, {
                                     voiceName: prefs.ttsVoiceName,
-                                    style: prefs.narrationStyle,
                                   })
                                 }
                               >
