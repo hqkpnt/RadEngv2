@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Award,
   BookmarkPlus,
   CheckCircle2,
+  ChevronDown,
   Clock,
   Languages,
   Layers,
@@ -19,6 +21,8 @@ interface ReadingTabProps {
   timedMode: boolean;
 }
 
+const FAST_EASE = [0.22, 1, 0.36, 1] as const;
+
 export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => {
   const {
     prefs,
@@ -30,6 +34,37 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
     showToast,
   } = useApp();
   const { reading } = lesson;
+
+  const [showAllVi, setShowAllVi] = useState(false);
+  const [openViParas, setOpenViParas] = useState<Record<string, boolean>>({});
+  const [glossaryListOpen, setGlossaryListOpen] = useState(false);
+  const [activeGlossary, setActiveGlossary] = useState<GlossaryItem | null>(null);
+  const [highlightPara, setHighlightPara] = useState<string | null>(null);
+
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [checked, setChecked] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState(600);
+
+  useEffect(() => {
+    setShowAllVi(false);
+    setOpenViParas({});
+    setGlossaryListOpen(false);
+    setActiveGlossary(null);
+    setHighlightPara(null);
+    setAnswers({});
+    setChecked(false);
+    setSecondsLeft(600);
+  }, [lesson.id]);
+
+  useEffect(() => {
+    if (!timedMode || checked) return;
+    if (secondsLeft <= 0) {
+      setChecked(true);
+      return;
+    }
+    const id = window.setInterval(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => window.clearInterval(id);
+  }, [timedMode, checked, secondsLeft]);
 
   const findContextForTerm = (term: string): { exampleEn: string; exampleVi: string } => {
     const lower = term.toLowerCase();
@@ -46,25 +81,6 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
       exampleVi: reading.paragraphs[0]?.vi || '',
     };
   };
-
-  const [showAllVi, setShowAllVi] = useState(false);
-  const [openViParas, setOpenViParas] = useState<Record<string, boolean>>({});
-  const [activeGlossary, setActiveGlossary] = useState<GlossaryItem | null>(null);
-  const [highlightPara, setHighlightPara] = useState<string | null>(null);
-
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [checked, setChecked] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(600);
-
-  useEffect(() => {
-    if (!timedMode || checked) return;
-    if (secondsLeft <= 0) {
-      setChecked(true);
-      return;
-    }
-    const id = window.setInterval(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => window.clearInterval(id);
-  }, [timedMode, checked, secondsLeft]);
 
   const renderParagraphWithGlossary = (text: string) => {
     if (reading.glossary.length === 0) return text;
@@ -123,120 +139,134 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
   return (
     <div className="reading-split-ielts">
       {/* Left Pane: Independent-Scroll Bilingual Passage & Glossary */}
-      <section className="card reading-pane-scroll stack-md" aria-label="Bài đọc hiểu">
+      <section className="card reading-pane-scroll stack-lg" aria-label="Bài đọc hiểu">
         <div className="flex-between flex-wrap">
           <div>
             <span className="badge badge-accent">Reading Passage</span>
-            <h2 style={{ margin: '6px 0 0', fontSize: '1.18rem' }}>{reading.title}</h2>
+            <h2 style={{ margin: '8px 0 0', fontSize: '1.22rem', lineHeight: 1.35 }}>
+              {reading.title}
+            </h2>
           </div>
           <button
             className={`btn btn-sm ${showAllVi ? 'btn-primary' : 'btn-soft'}`}
             onClick={() => setShowAllVi((v) => !v)}
           >
-            <Languages size={14} /> {showAllVi ? 'Đang bật Song ngữ' : 'Bật song ngữ toàn bài'}
+            <Languages size={14} /> {showAllVi ? 'Đang bật Song ngữ' : 'Song ngữ toàn bài'}
           </button>
         </div>
 
-        {activeGlossary && (
-          <div className="card-subtle stack-sm" style={{ borderColor: 'var(--accent)' }}>
-            <div className="flex-between">
-              <div>
-                <strong style={{ color: 'var(--accent)' }}>{activeGlossary.term}</strong>{' '}
-                {activeGlossary.ipa && (
-                  <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {activeGlossary.ipa}
-                  </span>
-                )}
+        <AnimatePresence initial={false}>
+          {activeGlossary && (
+            <motion.div
+              key={activeGlossary.termKey}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: FAST_EASE }}
+              className="soft-tint stack-sm"
+              style={{ borderLeft: '3px solid var(--accent)' }}
+            >
+              <div className="flex-between">
+                <div>
+                  <strong style={{ color: 'var(--accent)', fontSize: '1.02rem' }}>
+                    {activeGlossary.term}
+                  </strong>{' '}
+                  {activeGlossary.ipa && (
+                    <span className="mono" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      {activeGlossary.ipa}
+                    </span>
+                  )}
+                </div>
+                <button
+                  className="btn btn-sm btn-icon"
+                  onClick={() => setActiveGlossary(null)}
+                  aria-label="Đóng glossary"
+                >
+                  <X size={14} />
+                </button>
               </div>
-              <button
-                className="btn btn-sm btn-icon"
-                onClick={() => setActiveGlossary(null)}
-                aria-label="Đóng glossary"
-              >
-                <X size={14} />
-              </button>
-            </div>
-            <div style={{ fontWeight: 600, fontSize: '0.92rem' }}>{activeGlossary.meaningVi}</div>
-            {activeGlossary.wordRoot && (
-              <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                Gốc từ: {activeGlossary.wordRoot}
-              </div>
-            )}
-            <div className="flex-row flex-wrap">
-              <button
-                className="btn btn-sm btn-soft"
-                onClick={() =>
-                  speakText(activeGlossary.term, prefs.ttsRate, prefs.ttsVoice, {
-                    voiceName: prefs.ttsVoiceName,
-                  })
-                }
-              >
-                <Volume2 size={13} /> Nghe
-              </button>
-              <button
-                className="btn btn-sm btn-primary"
-                title="Lưu thuật ngữ kèm câu ngữ cảnh trong bài đọc vào Flashcard bài học & SRS"
-                onClick={() => {
-                  const ctx = findContextForTerm(activeGlossary.term);
-                  addLessonVocab(
-                    lesson.id,
-                    {
+              <div style={{ fontWeight: 600, fontSize: '0.94rem' }}>{activeGlossary.meaningVi}</div>
+              {activeGlossary.wordRoot && (
+                <div style={{ fontSize: '0.83rem', color: 'var(--text-secondary)' }}>
+                  <strong>Gốc từ:</strong> {activeGlossary.wordRoot}
+                </div>
+              )}
+              <div className="flex-row flex-wrap" style={{ paddingTop: 2 }}>
+                <button
+                  className="btn btn-sm btn-soft"
+                  onClick={() =>
+                    speakText(activeGlossary.term, prefs.ttsRate, prefs.ttsVoice, {
+                      voiceName: prefs.ttsVoiceName,
+                    })
+                  }
+                >
+                  <Volume2 size={13} /> Nghe
+                </button>
+                <button
+                  className="btn btn-sm btn-primary"
+                  title="Lưu thuật ngữ kèm câu ngữ cảnh trong bài đọc vào Flashcard bài học & SRS"
+                  onClick={() => {
+                    const ctx = findContextForTerm(activeGlossary.term);
+                    addLessonVocab(
+                      lesson.id,
+                      {
+                        termKey: activeGlossary.termKey,
+                        term: activeGlossary.term,
+                        ipa: activeGlossary.ipa,
+                        pos: 'glossary',
+                        wordRoot: activeGlossary.wordRoot,
+                        meaningVi: activeGlossary.meaningVi,
+                        noteVi: `Trích từ bài đọc: ${reading.title}`,
+                        exampleEn: ctx.exampleEn,
+                        exampleVi: ctx.exampleVi,
+                      },
+                      true
+                    );
+                  }}
+                >
+                  <BookmarkPlus size={13} /> Lưu Flashcard &amp; SRS
+                </button>
+                <button
+                  className="btn btn-sm"
+                  onClick={() =>
+                    addCardToSrs({
+                      front: activeGlossary.term,
+                      meaning: activeGlossary.meaningVi,
+                      ipa: activeGlossary.ipa,
+                      wordRoot: activeGlossary.wordRoot,
+                      termKey: activeGlossary.termKey,
+                      source: 'lesson',
+                      lessonId: lesson.id,
+                    })
+                  }
+                >
+                  <Layers size={13} /> + SRS
+                </button>
+                <button
+                  className={`btn btn-sm ${state.masteredBank[activeGlossary.termKey] ? 'btn-success' : ''}`}
+                  onClick={() =>
+                    toggleMastered(lesson, {
                       termKey: activeGlossary.termKey,
                       term: activeGlossary.term,
                       ipa: activeGlossary.ipa,
                       pos: 'glossary',
                       wordRoot: activeGlossary.wordRoot,
                       meaningVi: activeGlossary.meaningVi,
-                      noteVi: `Trích từ bài đọc: ${reading.title}`,
-                      exampleEn: ctx.exampleEn,
-                      exampleVi: ctx.exampleVi,
-                    },
-                    true
-                  );
-                }}
-              >
-                <BookmarkPlus size={13} /> Lưu Flashcard & SRS
-              </button>
-              <button
-                className="btn btn-sm"
-                onClick={() =>
-                  addCardToSrs({
-                    front: activeGlossary.term,
-                    meaning: activeGlossary.meaningVi,
-                    ipa: activeGlossary.ipa,
-                    wordRoot: activeGlossary.wordRoot,
-                    termKey: activeGlossary.termKey,
-                    source: 'lesson',
-                    lessonId: lesson.id,
-                  })
-                }
-              >
-                <Layers size={13} /> Chỉ thêm SRS
-              </button>
-              <button
-                className={`btn btn-sm ${state.masteredBank[activeGlossary.termKey] ? 'btn-success' : ''}`}
-                onClick={() =>
-                  toggleMastered(lesson, {
-                    termKey: activeGlossary.termKey,
-                    term: activeGlossary.term,
-                    ipa: activeGlossary.ipa,
-                    pos: 'glossary',
-                    wordRoot: activeGlossary.wordRoot,
-                    meaningVi: activeGlossary.meaningVi,
-                    noteVi: '',
-                    exampleEn: '',
-                    exampleVi: '',
-                  })
-                }
-              >
-                <Award size={13} />{' '}
-                {state.masteredBank[activeGlossary.termKey] ? 'Đã thuộc ✓' : 'Đã thuộc'}
-              </button>
-            </div>
-          </div>
-        )}
+                      noteVi: '',
+                      exampleEn: '',
+                      exampleVi: '',
+                    })
+                  }
+                >
+                  <Award size={13} />{' '}
+                  {state.masteredBank[activeGlossary.termKey] ? 'Đã thuộc ✓' : 'Đã thuộc'}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        <div className="stack-md">
+        <div className="stack-lg">
           {reading.paragraphs.map((p, idx) => {
             const viVisible = showAllVi || Boolean(openViParas[p.id]);
             const isEvidence = highlightPara === p.id;
@@ -245,16 +275,16 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                 key={p.id}
                 id={`reading-para-${lesson.id}-${p.id}`}
                 className={`stack-sm ${isEvidence ? 'evidence-highlight' : ''}`}
-                style={{ padding: '6px 8px' }}
+                style={{ padding: '6px 10px' }}
               >
                 <div className="flex-between">
                   <span className="badge mono" style={{ fontSize: '0.72rem' }}>
-                    Đoạn {idx + 1} ({p.id})
+                    Đoạn {idx + 1} · {p.id}
                   </span>
                   {p.vi && (
                     <button
                       className="btn btn-sm"
-                      style={{ padding: '3px 8px', fontSize: '0.76rem' }}
+                      style={{ padding: '3px 10px', fontSize: '0.76rem' }}
                       onClick={() =>
                         setOpenViParas((prev) => ({ ...prev, [p.id]: !prev[p.id] }))
                       }
@@ -263,49 +293,87 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                     </button>
                   )}
                 </div>
-                <p style={{ margin: 0, lineHeight: 1.75 }}>{renderParagraphWithGlossary(p.en)}</p>
-                {viVisible && p.vi && (
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: '0.9rem',
-                      color: 'var(--text-secondary)',
-                      borderLeft: '2px solid var(--border-strong)',
-                      paddingLeft: 10,
-                    }}
-                  >
-                    {p.vi}
-                  </p>
-                )}
+                <p className="prose-measure" style={{ margin: 0 }}>
+                  {renderParagraphWithGlossary(p.en)}
+                </p>
+                <AnimatePresence initial={false}>
+                  {viVisible && p.vi && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -3 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -3 }}
+                      transition={{ duration: 0.16, ease: FAST_EASE }}
+                      className="prose-explanation"
+                      style={{
+                        margin: '4px 0 0',
+                        fontSize: '0.92rem',
+                        color: 'var(--text-secondary)',
+                        borderLeft: '2px solid var(--border-strong)',
+                        paddingLeft: 12,
+                      }}
+                    >
+                      {p.vi}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
         </div>
 
+        {/* Progressive Disclosure for Glossary Chips */}
         {reading.glossary.length > 0 && (
-          <div className="card-subtle stack-sm">
-            <span style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-muted)' }}>
-              GLOSSARY THUẬT NGỮ TRONG BÀI (Bấm để xem chi tiết)
-            </span>
-            <div className="chip-list">
-              {reading.glossary.map((g) => (
-                <button
-                  key={g.termKey}
-                  className={`chip ${activeGlossary?.termKey === g.termKey ? 'active' : ''}`}
-                  onClick={() => setActiveGlossary(g)}
+          <div style={{ paddingTop: 4 }}>
+            <button
+              type="button"
+              className="disclosure-trigger"
+              aria-expanded={glossaryListOpen}
+              onClick={() => setGlossaryListOpen((v) => !v)}
+            >
+              <ChevronDown
+                size={15}
+                style={{
+                  transform: glossaryListOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.18s ease-out',
+                }}
+              />
+              <span>Danh sách Glossary trong bài ({reading.glossary.length} thuật ngữ)</span>
+            </button>
+            <AnimatePresence initial={false}>
+              {glossaryListOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18, ease: FAST_EASE }}
+                  className="chip-list"
+                  style={{ marginTop: 10 }}
                 >
-                  {g.term}
-                </button>
-              ))}
-            </div>
+                  {reading.glossary.map((g) => (
+                    <button
+                      key={g.termKey}
+                      className={`chip ${activeGlossary?.termKey === g.termKey ? 'active' : ''}`}
+                      onClick={() => setActiveGlossary(g)}
+                    >
+                      {g.term}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </section>
 
       {/* Right Pane: Independent-Scroll 4 Question Types */}
-      <section className="card reading-pane-scroll stack-md" aria-label="Câu hỏi đọc hiểu">
+      <section className="card reading-pane-scroll stack-lg" aria-label="Câu hỏi đọc hiểu">
         <div className="flex-between flex-wrap">
-          <h3 style={{ margin: 0, fontSize: '1.08rem' }}>Bài tập Đọc hiểu (4 dạng · {totalQ} câu)</h3>
+          <div>
+            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Bài tập Đọc hiểu ({totalQ} câu)</h3>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 2 }}>
+              4 dạng câu hỏi IELTS · Cuộn độc lập với bài đọc
+            </div>
+          </div>
           <div className="flex-row">
             {timedMode && (
               <span className="badge badge-accent mono">
@@ -329,41 +397,47 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         </div>
 
         {mcq.length > 0 && (
-          <div className="stack-sm">
-            <strong style={{ fontSize: '0.86rem', color: 'var(--accent)' }}>1. Multiple Choice (MCQ)</strong>
+          <div className="stack-md">
+            <strong style={{ fontSize: '0.86rem', letterSpacing: '0.02em', color: 'var(--accent)' }}>
+              1. Multiple Choice ({mcq.length} câu)
+            </strong>
             {mcq.map((q, i) => (
-              <div key={q.id} className="card-subtle stack-sm">
-                <div style={{ fontWeight: 600 }}>
+              <div key={q.id} className="exercise-block stack-sm">
+                <div className="prose-explanation" style={{ fontWeight: 600 }}>
                   {i + 1}. {q.question}
                 </div>
-                {q.options.map((opt) => {
-                  let cls = 'quiz-option';
-                  if (checked) {
-                    if (opt === q.answer) cls += ' correct';
-                    else if (answers[q.id] === opt) cls += ' wrong';
-                  } else if (answers[q.id] === opt) {
-                    cls += ' selected';
-                  }
-                  return (
-                    <button
-                      key={opt}
-                      className={cls}
-                      disabled={checked}
-                      onClick={() => setAnswers((p) => ({ ...p, [q.id]: opt }))}
-                    >
-                      <span>{opt}</span>
-                    </button>
-                  );
-                })}
+                <div className="stack-sm">
+                  {q.options.map((opt) => {
+                    let cls = 'quiz-option';
+                    if (checked) {
+                      if (opt === q.answer) cls += ' correct';
+                      else if (answers[q.id] === opt) cls += ' wrong';
+                    } else if (answers[q.id] === opt) {
+                      cls += ' selected';
+                    }
+                    return (
+                      <button
+                        key={opt}
+                        className={cls}
+                        disabled={checked}
+                        onClick={() => setAnswers((p) => ({ ...p, [q.id]: opt }))}
+                      >
+                        <span>{opt}</span>
+                      </button>
+                    );
+                  })}
+                </div>
                 {checked && (
-                  <div className="flex-between flex-wrap" style={{ fontSize: '0.82rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{q.explanationVi}</span>
+                  <div className="flex-between flex-wrap" style={{ fontSize: '0.84rem', paddingTop: 4 }}>
+                    <span className="prose-explanation" style={{ color: 'var(--text-secondary)' }}>
+                      {q.explanationVi}
+                    </span>
                     {q.evidenceParagraph && (
                       <button
                         className="btn btn-sm btn-soft"
                         onClick={() => jumpToEvidenceParagraph(q.evidenceParagraph)}
                       >
-                        Xem bằng chứng ({q.evidenceParagraph})
+                        Bằng chứng ({q.evidenceParagraph})
                       </button>
                     )}
                   </div>
@@ -374,13 +448,13 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         )}
 
         {tfng.length > 0 && (
-          <div className="stack-sm">
-            <strong style={{ fontSize: '0.86rem', color: 'var(--accent)' }}>
-              2. True / False / Not Given
+          <div className="stack-md">
+            <strong style={{ fontSize: '0.86rem', letterSpacing: '0.02em', color: 'var(--accent)' }}>
+              2. True / False / Not Given ({tfng.length} câu)
             </strong>
             {tfng.map((q, i) => (
-              <div key={q.id} className="card-subtle stack-sm">
-                <div style={{ fontWeight: 600 }}>
+              <div key={q.id} className="exercise-block stack-sm">
+                <div className="prose-explanation" style={{ fontWeight: 600 }}>
                   {i + 1}. {q.statement}
                 </div>
                 <div className="grid-3" style={{ gap: 8 }}>
@@ -406,8 +480,10 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                   })}
                 </div>
                 {checked && (
-                  <div className="flex-between flex-wrap" style={{ fontSize: '0.82rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>{q.explanationVi}</span>
+                  <div className="flex-between flex-wrap" style={{ fontSize: '0.84rem', paddingTop: 4 }}>
+                    <span className="prose-explanation" style={{ color: 'var(--text-secondary)' }}>
+                      {q.explanationVi}
+                    </span>
                     {q.evidenceParagraph && (
                       <button
                         className="btn btn-sm btn-soft"
@@ -424,11 +500,13 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         )}
 
         {matching.length > 0 && (
-          <div className="stack-sm">
-            <strong style={{ fontSize: '0.86rem', color: 'var(--accent)' }}>3. Matching</strong>
+          <div className="stack-md">
+            <strong style={{ fontSize: '0.86rem', letterSpacing: '0.02em', color: 'var(--accent)' }}>
+              3. Matching ({matching.length} câu)
+            </strong>
             {matching.map((q, i) => (
-              <div key={q.id} className="card-subtle stack-sm">
-                <div style={{ fontWeight: 600 }}>
+              <div key={q.id} className="exercise-block stack-sm">
+                <div className="prose-explanation" style={{ fontWeight: 600 }}>
                   {i + 1}. {q.prompt}
                 </div>
                 <select
@@ -445,13 +523,30 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                   ))}
                 </select>
                 {checked && (
-                  <div
-                    style={{
-                      fontSize: '0.84rem',
-                      color: answers[q.id] === q.answer ? 'var(--success)' : 'var(--danger)',
-                    }}
-                  >
-                    {answers[q.id] === q.answer ? '✓ Chính xác!' : `✗ Đáp án đúng: ${q.answer}`}
+                  <div className="flex-between flex-wrap" style={{ fontSize: '0.84rem', paddingTop: 4 }}>
+                    <div className="stack-sm" style={{ gap: 2 }}>
+                      <span
+                        style={{
+                          fontWeight: 600,
+                          color: answers[q.id] === q.answer ? 'var(--success)' : 'var(--danger)',
+                        }}
+                      >
+                        {answers[q.id] === q.answer ? '✓ Chính xác!' : `✗ Đáp án đúng: ${q.answer}`}
+                      </span>
+                      {q.explanationVi && (
+                        <span className="prose-explanation" style={{ color: 'var(--text-secondary)' }}>
+                          {q.explanationVi}
+                        </span>
+                      )}
+                    </div>
+                    {q.evidenceParagraph && (
+                      <button
+                        className="btn btn-sm btn-soft"
+                        onClick={() => jumpToEvidenceParagraph(q.evidenceParagraph)}
+                      >
+                        Bằng chứng ({q.evidenceParagraph})
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -460,15 +555,15 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         )}
 
         {completion.length > 0 && (
-          <div className="stack-sm">
-            <strong style={{ fontSize: '0.86rem', color: 'var(--accent)' }}>
-              4. Summary Completion / Short Answer
+          <div className="stack-md">
+            <strong style={{ fontSize: '0.86rem', letterSpacing: '0.02em', color: 'var(--accent)' }}>
+              4. Summary Completion / Short Answer ({completion.length} câu)
             </strong>
             {completion.map((q, i) => {
               const ok = normalizeWord(answers[q.id] || '') === normalizeWord(q.answer);
               return (
-                <div key={q.id} className="card-subtle stack-sm">
-                  <div style={{ fontWeight: 600 }}>
+                <div key={q.id} className="exercise-block stack-sm">
+                  <div className="prose-explanation" style={{ fontWeight: 600 }}>
                     {i + 1}. {q.prompt}
                   </div>
                   <input
@@ -479,8 +574,25 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
                     onChange={(e) => setAnswers((p) => ({ ...p, [q.id]: e.target.value }))}
                   />
                   {checked && (
-                    <div style={{ fontSize: '0.84rem', color: ok ? 'var(--success)' : 'var(--danger)' }}>
-                      {ok ? '✓ Chính xác!' : `✗ Đáp án đúng: "${q.answer}"`}
+                    <div className="flex-between flex-wrap" style={{ fontSize: '0.84rem', paddingTop: 4 }}>
+                      <div className="stack-sm" style={{ gap: 2 }}>
+                        <span style={{ fontWeight: 600, color: ok ? 'var(--success)' : 'var(--danger)' }}>
+                          {ok ? '✓ Chính xác!' : `✗ Đáp án đúng: "${q.answer}"`}
+                        </span>
+                        {q.explanationVi && (
+                          <span className="prose-explanation" style={{ color: 'var(--text-secondary)' }}>
+                            {q.explanationVi}
+                          </span>
+                        )}
+                      </div>
+                      {q.evidenceParagraph && (
+                        <button
+                          className="btn btn-sm btn-soft"
+                          onClick={() => jumpToEvidenceParagraph(q.evidenceParagraph)}
+                        >
+                          Bằng chứng ({q.evidenceParagraph})
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -490,7 +602,7 @@ export const ReadingTab: React.FC<ReadingTabProps> = ({ lesson, timedMode }) => 
         )}
 
         <button className="btn btn-primary" onClick={handleCheckAll}>
-          <CheckCircle2 size={15} /> Chấm bài Reading & Lưu tiến độ
+          <CheckCircle2 size={15} /> Chấm bài Reading &amp; Lưu tiến độ
         </button>
       </section>
     </div>

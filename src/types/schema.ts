@@ -45,10 +45,13 @@ export interface VocabItem {
 
 export interface GrammarExercise {
   id: string;
-  type: 'mcq' | 'fill';
+  type: 'mcq' | 'fill' | 'error' | 'rewrite';
   prompt: string;
+  sourceSentence?: string;
+  hint?: string;
   options?: string[];
   answer: string;
+  acceptedAnswers?: string[];
   explanationVi: string;
 }
 

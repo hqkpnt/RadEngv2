@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   BookMarked,
@@ -124,9 +124,19 @@ export const LessonDetailPage: React.FC<LessonDetailPageProps> = ({ lessonId, na
         </div>
       </div>
 
-      {activeSkill === 'vocabulary' && <VocabularyTab lesson={lesson} timedMode={timedMode} />}
-      {activeSkill === 'grammar' && <GrammarTab lesson={lesson} timedMode={timedMode} />}
-      {activeSkill === 'reading' && <ReadingTab lesson={lesson} timedMode={timedMode} />}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${lesson.id}-${activeSkill}`}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {activeSkill === 'vocabulary' && <VocabularyTab lesson={lesson} timedMode={timedMode} />}
+          {activeSkill === 'grammar' && <GrammarTab lesson={lesson} timedMode={timedMode} />}
+          {activeSkill === 'reading' && <ReadingTab lesson={lesson} timedMode={timedMode} />}
+        </motion.div>
+      </AnimatePresence>
 
       <NotebookDrawer
         open={notebookOpen}

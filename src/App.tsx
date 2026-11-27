@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { MotionConfig } from 'framer-motion';
 import { ShieldAlert } from 'lucide-react';
 import { Layout, RouteKey } from './components/Layout';
 import { AppProvider } from './context/AppContext';
@@ -114,9 +115,11 @@ export const App: React.FC = () => {
   }
 
   return (
-    <AppProvider>
-      <RouterView />
-    </AppProvider>
+    <MotionConfig reducedMotion="user">
+      <AppProvider>
+        <RouterView />
+      </AppProvider>
+    </MotionConfig>
   );
 };
 

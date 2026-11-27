@@ -65,10 +65,30 @@ const RADENG_V31_SAMPLE = {
         'A 2.4F microcatheter was advanced superselectively into the right hepatic feeding branch.',
       quickPractice: [
         {
+          type: 'mcq',
           question: 'Drug-eluting beads were _____ slowly under fluoroscopic guidance.',
           options: ['infused', 'infusing', 'infuse'],
           correctAnswer: 'infused',
           explanation: 'Dùng quá khứ phân từ sau "were" trong cấu trúc bị động quá khứ đơn.',
+        },
+        {
+          type: 'error',
+          prompt: 'Sửa lỗi trong câu sau (gõ cụm động từ đúng):',
+          sourceSentence: 'Cone-beam CT images was acquired before chemoembolization.',
+          hint: 'Images là danh từ số nhiều.',
+          answer: 'were acquired',
+          explanation: 'Chủ ngữ số nhiều "images" phải đi với "were acquired".',
+        },
+        {
+          type: 'rewrite',
+          prompt: 'Viết lại câu sau sang thể bị động quá khứ đơn:',
+          sourceSentence: 'The operator advanced a 2.4F microcatheter superselectively into the tumor-feeding artery.',
+          hint: 'Bắt đầu bằng: A 2.4F microcatheter...',
+          answer: 'A 2.4F microcatheter was advanced superselectively into the tumor-feeding artery.',
+          acceptedAnswers: [
+            'A 2.4F microcatheter was superselectively advanced into the tumor-feeding artery.',
+          ],
+          explanation: 'Chuyển tân ngữ lên làm chủ ngữ kèm cấu trúc was + V3/ed + trạng từ cách thức.',
         },
       ],
     },
@@ -79,6 +99,10 @@ const RADENG_V31_SAMPLE = {
       {
         en: 'Hepatocellular carcinoma derives its blood supply predominantly from the hepatic artery, whereas normal liver parenchyma is perfused mainly by the portal vein.',
         vi: 'Ung thư biểu mô tế bào gan nhận máu chủ yếu từ động mạch gan, trong khi nhu mô gan bình thường được tưới máu chủ yếu qua tĩnh mạch cửa.',
+      },
+      {
+        en: 'Superselective catheterization with cone-beam CT confirmation maximizes intratumoral drug concentration while minimizing non-target embolization of adjacent healthy liver segments.',
+        vi: 'Luồn ống thông siêu chọn lọc kèm xác nhận bằng CT chùm tia hình nón giúp tối đa hóa nồng độ thuốc trong u đồng thời giảm thiểu tắc mạch ngoài đích tới các phân thùy gan lành kế cận.',
       },
     ],
     glossary: [
@@ -95,6 +119,26 @@ const RADENG_V31_SAMPLE = {
         statement: 'Normal liver parenchyma relies predominantly on the hepatic artery.',
         answer: 'FALSE',
         evidenceParagraph: 'p1',
+        explanationVi: 'Đoạn 1 nêu nhu mô gan bình thường được tưới máu chủ yếu qua tĩnh mạch cửa (portal vein).',
+      },
+      {
+        type: 'mcq',
+        question: 'What is the main advantage of superselective catheterization with cone-beam CT?',
+        options: [
+          'Increasing portal vein occlusion',
+          'Maximizing drug concentration in the tumor while sparing healthy liver',
+          'Replacing arterial access with venous access',
+        ],
+        answer: 'Maximizing drug concentration in the tumor while sparing healthy liver',
+        evidenceParagraph: 'p2',
+        explanationVi: 'Đoạn 2 chỉ rõ kỹ thuật này tối đa hóa nồng độ thuốc trong u và hạn chế tắc mạch ngoài đích.',
+      },
+      {
+        type: 'completion',
+        prompt: 'Hepatocellular carcinoma derives its blood supply predominantly from the hepatic _____.',
+        answer: 'artery',
+        evidenceParagraph: 'p1',
+        explanationVi: 'Đoạn 1 ghi rõ cụm "from the hepatic artery".',
       },
     ],
   },

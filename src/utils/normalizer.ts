@@ -167,12 +167,37 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
       const quickExercises: GrammarExercise[] = rawExercises
         .map((ex, eIdx): GrammarExercise | null => {
           const e = asObj(ex);
-          const prompt = asStr(e.prompt || e.question || e.sentence || e.text);
-          if (!prompt) return null;
+          const prompt = asStr(e.prompt || e.question || e.sentence || e.text || e.instruction);
+          const sourceSentence = asStr(
+            e.sourceSentence || e.originalSentence || e.original || e.baseSentence
+          );
+          if (!prompt && !sourceSentence) return null;
           const options = asArr(e.options || e.choices).map((c) => asStr(c)).filter(Boolean);
-          const type: 'mcq' | 'fill' =
-            asStr(e.type).toLowerCase() === 'fill' || options.length === 0 ? 'fill' : 'mcq';
+          const rawType = asStr(e.type).toLowerCase();
+          let type: GrammarExercise['type'];
+          if (
+            rawType.includes('rewrite') ||
+            rawType.includes('transform') ||
+            rawType.includes('paraphrase')
+          ) {
+            type = 'rewrite';
+          } else if (rawType.includes('error') || rawType.includes('correct') || rawType.includes('fix')) {
+            type = 'error';
+          } else if (rawType === 'fill' || options.length === 0) {
+            type = 'fill';
+          } else {
+            type = 'mcq';
+          }
+
           const answer = resolveAnswer(e.answer ?? e.correctAnswer ?? e.correctIndex, options);
+          const acceptedAnswers = asArr(
+            e.acceptedAnswers || e.acceptableAnswers || e.alternatives || e.validAnswers
+          )
+            .map((a) => asStr(a))
+            .filter((a) => Boolean(a) && a !== answer);
+
+          const hint = asStr(e.hint || e.keyword || e.keywords || e.cue || e.structureHint);
+
           let exId = asStr(e.id) || `${pointId}_q${eIdx + 1}`;
           if (seenExIds.has(exId)) {
             exId = `${pointId}_${exId}_${eIdx + 1}`;
@@ -181,9 +206,12 @@ function normalizeGrammar(rawGrammar: unknown): GrammarPoint[] {
           return {
             id: exId,
             type,
-            prompt,
+            prompt: prompt || 'Viết lại câu sau theo cấu trúc gợi ý:',
+            sourceSentence: sourceSentence || undefined,
+            hint: hint || undefined,
             options: options.length > 0 ? options : undefined,
             answer,
+            acceptedAnswers: acceptedAnswers.length > 0 ? acceptedAnswers : undefined,
             explanationVi: asStr(e.explanationVi || e.explanation || e.noteVi || e.note),
           };
         })

@@ -16,7 +16,7 @@
       "mTICI",
       "DSA"
     ],
-    "estimatedMinutes": 30,
+    "estimatedMinutes": 35,
     "createdAt": "2026-11-25"
   },
   "vocabulary": [
@@ -85,6 +85,28 @@
       "noteVi": "Tuần hoàn bàng hệ tốt giúp làm chậm tốc độ tiến triển lõi nhồi máu và mở rộng cửa sổ can thiệp.",
       "exampleEn": "Robust leptomeningeal collateral circulation sustained the penumbra well beyond the 6-hour window.",
       "exampleVi": "Tuần hoàn bàng hệ màng mềm tốt đã duy trì vùng tranh tối tranh sáng vượt xa cửa sổ 6 giờ."
+    },
+    {
+      "termKey": "infarct_core",
+      "term": "infarct core",
+      "ipa": "/ˈɪn.fɑːrkt kɔːr/",
+      "pos": "noun phrase",
+      "wordRoot": "in- (vào trong) + farcire (nhồi đầy) -> vùng mô hoại tử không hồi phục",
+      "meaningVi": "Lõi nhồi máu (vùng nhu mô não đã tổn thương không hồi phục)",
+      "noteVi": "Thể tích lõi nhồi máu ước tính trên bản đồ rCBF < 30% (CTP) hoặc hạn chế khuếch tán mạnh trên DWI.",
+      "exampleEn": "A small baseline infarct core paired with a large penumbra predicts favorable clinical recovery after thrombectomy.",
+      "exampleVi": "Lõi nhồi máu ban đầu nhỏ đi kèm vùng tranh tối tranh sáng rộng dự báo hồi phục lâm sàng tốt sau lấy huyết khối."
+    },
+    {
+      "termKey": "proximal_flow_arrest",
+      "term": "proximal flow arrest",
+      "ipa": "/ˈprɒk.sɪ.məl fləʊ əˈrest/",
+      "pos": "noun phrase",
+      "wordRoot": "proximus (gần nhất) + arrest (chặn dừng dòng chảy)",
+      "meaningVi": "Chặn dòng chảy đầu gần (bằng ống thông dẫn có bóng BGC)",
+      "noteVi": "Bơm bóng tạm thời tại ĐM cảnh trong lúc kéo huyết khối giúp đảo ngược dòng và giảm nguy cơ vỡ vụn huyết khối.",
+      "exampleEn": "Inflation of the balloon guide catheter creates proximal flow arrest during clot retrieval.",
+      "exampleVi": "Bơm bóng của ống thông dẫn tạo chặn dòng đầu gần trong suốt quá trình kéo huyết khối."
     }
   ],
   "grammar": [
@@ -129,6 +151,43 @@
           ],
           "answer": "The stent retriever was deployed across the occluded M1 segment.",
           "explanationVi": "Đưa đối tượng chịu tác động ('The stent retriever') làm chủ ngữ với cấu trúc 'was + V3/ed'."
+        },
+        {
+          "id": "gp1_q4",
+          "type": "error",
+          "prompt": "Sửa lỗi ngữ pháp trong câu sau (chỉ gõ cụm động từ đúng thay cho phần sai):",
+          "sourceSentence": "Non-contrast CT and multiphase CTA was obtained immediately upon arrival.",
+          "hint": "Chủ ngữ ghép số nhiều (CT and CTA) đi với trợ động từ nào?",
+          "answer": "were obtained",
+          "acceptedAnswers": [
+            "Non-contrast CT and multiphase CTA were obtained immediately upon arrival."
+          ],
+          "explanationVi": "Chủ ngữ số nhiều 'Non-contrast CT and multiphase CTA' yêu cầu động từ to be số nhiều 'were obtained'."
+        },
+        {
+          "id": "gp1_q5",
+          "type": "rewrite",
+          "prompt": "Viết lại câu sau sang thể bị động quá khứ đơn (bỏ chủ ngữ 'The interventionalist'):",
+          "sourceSentence": "The interventionalist advanced a large-bore aspiration catheter to the proximal face of the clot.",
+          "hint": "Bắt đầu bằng: A large-bore aspiration catheter...",
+          "answer": "A large-bore aspiration catheter was advanced to the proximal face of the clot.",
+          "acceptedAnswers": [
+            "A large-bore aspiration catheter was advanced to the proximal face of the clot by the interventionalist."
+          ],
+          "explanationVi": "Đưa tân ngữ 'A large-bore aspiration catheter' lên làm chủ ngữ và chia bị động quá khứ đơn 'was advanced'."
+        },
+        {
+          "id": "gp1_q6",
+          "type": "rewrite",
+          "prompt": "Chuyển câu chủ động sau sang thể bị động quá khứ đơn theo văn phong tường trình DSA:",
+          "sourceSentence": "The team achieved femoral hemostasis using a vascular closure device.",
+          "hint": "Bắt đầu bằng: Femoral hemostasis...",
+          "answer": "Femoral hemostasis was achieved using a vascular closure device.",
+          "acceptedAnswers": [
+            "Femoral hemostasis was achieved with a vascular closure device.",
+            "Femoral hemostasis was achieved using a vascular closure device by the team."
+          ],
+          "explanationVi": "Đưa 'Femoral hemostasis' làm chủ ngữ và dùng cấu trúc 'was achieved using...' để câu khách quan, chuẩn học thuật."
         }
       ]
     },
@@ -173,6 +232,43 @@
           ],
           "answer": "Following sheath removal, hemostasis was achieved using a vascular closure device.",
           "explanationVi": "Kết hợp chuẩn xác 'Following + danh từ' với thể bị động quá khứ đơn ở mệnh đề chính."
+        },
+        {
+          "id": "gp2_q4",
+          "type": "error",
+          "prompt": "Sửa lỗi phân từ trong câu sau (gõ từ đúng thay cho từ sai):",
+          "sourceSentence": "Proximal flow arrest was maintained during retrieval, minimized distal embolization.",
+          "hint": "Mệnh đề kết quả mang nghĩa chủ động nên dùng V-ing hay V-ed?",
+          "answer": "minimizing",
+          "acceptedAnswers": [
+            "Proximal flow arrest was maintained during retrieval, minimizing distal embolization."
+          ],
+          "explanationVi": "Hành động chặn dòng đầu gần chủ động gây ra kết quả 'giảm thuyên tắc xa', nên phải dùng hiện tại phân từ 'minimizing'."
+        },
+        {
+          "id": "gp2_q5",
+          "type": "rewrite",
+          "prompt": "Gộp 2 câu sau thành 1 câu ngắn gọn dùng mệnh đề phân từ kết quả (V-ing):",
+          "sourceSentence": "Control angiography was performed. It demonstrated complete recanalization of the M1 segment.",
+          "hint": "Dùng dấu phẩy + demonstrating...",
+          "answer": "Control angiography was performed, demonstrating complete recanalization of the M1 segment.",
+          "acceptedAnswers": [
+            "Control angiography was performed, demonstrating complete recanalization of the M1."
+          ],
+          "explanationVi": "Rút gọn mệnh đề thứ hai ('It demonstrated...') thành cụm phân từ ', demonstrating...' để chỉ kết quả trực tiếp."
+        },
+        {
+          "id": "gp2_q6",
+          "type": "rewrite",
+          "prompt": "Viết lại câu sau dùng cấu trúc 'Following + cụm danh từ':",
+          "sourceSentence": "After the balloon guide catheter was inflated, the stent retriever was slowly withdrawn.",
+          "hint": "Bắt đầu bằng: Following inflation of...",
+          "answer": "Following inflation of the balloon guide catheter, the stent retriever was slowly withdrawn.",
+          "acceptedAnswers": [
+            "Following balloon guide catheter inflation, the stent retriever was slowly withdrawn.",
+            "Following inflation of the balloon guide catheter, the stent retriever was withdrawn slowly."
+          ],
+          "explanationVi": "Danh từ hóa động từ 'was inflated' thành 'inflation of...' sau giới từ 'Following' giúp câu súc tích chuẩn báo cáo y khoa."
         }
       ]
     }
@@ -217,6 +313,13 @@
         "ipa": "/ˌfɜːst ˈpɑːs ɪˈfekt/",
         "wordRoot": "first pass (lần kéo dụng cụ đầu tiên)",
         "meaningVi": "Hiệu ứng tái thông hoàn toàn (mTICI 2c–3) ngay lần kéo huyết khối đầu tiên"
+      },
+      {
+        "termKey": "proximal_flow_arrest",
+        "term": "proximal flow arrest",
+        "ipa": "/ˈprɒk.sɪ.məl fləʊ əˈrest/",
+        "wordRoot": "proximus (gần nhất) + arrest (chặn dừng dòng chảy)",
+        "meaningVi": "Chặn dòng đầu gần bằng bóng (giảm trôi mảnh huyết khối xa)"
       }
     ],
     "questions": {
@@ -233,6 +336,32 @@
           "answer": "Distinguishing irreversible infarct core from salvageable penumbra",
           "evidenceParagraph": "p2",
           "explanationVi": "Đoạn 2 chỉ rõ CTP phân biệt 'irreversibly damaged ischemic core' và 'salvageable ischemic penumbra'."
+        },
+        {
+          "id": "dr_mcq2",
+          "question": "Which imaging metric on non-contrast CT estimates early ischemic changes?",
+          "options": [
+            "mTICI grading scale",
+            "ASPECTS score",
+            "Target mismatch ratio",
+            "First-pass index"
+          ],
+          "answer": "ASPECTS score",
+          "evidenceParagraph": "p1",
+          "explanationVi": "Đoạn 1 nêu rõ: 'Non-contrast CT ... estimates early ischemic changes via the ASPECTS score'."
+        },
+        {
+          "id": "dr_mcq3",
+          "question": "Which procedural strategy is highlighted to reduce clot fragmentation during retrieval?",
+          "options": [
+            "Performing repeated contrast injections without aspiration",
+            "Delaying intervention until 24 hours after onset",
+            "Combining a large-bore aspiration catheter, stent retriever, and proximal flow arrest",
+            "Using non-contrast CT instead of DSA roadmap guidance"
+          ],
+          "answer": "Combining a large-bore aspiration catheter, stent retriever, and proximal flow arrest",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Đoạn 3 nêu rõ sự kết hợp 3 yếu tố này giúp 'reduces clot fragmentation and minimizes distal embolization'."
         }
       ],
       "tfng": [
@@ -249,6 +378,13 @@
           "answer": "FALSE",
           "evidenceParagraph": "p3",
           "explanationVi": "Đoạn 3 định nghĩa first-pass effect là đạt mTICI 2c–3 ngay ở 'initial retrieval attempt'."
+        },
+        {
+          "id": "dr_tf3",
+          "statement": "The passage specifies that transradial access results in lower mortality than transfemoral access.",
+          "answer": "NOT GIVEN",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Bài đọc không đề cập hay so sánh tỷ lệ tử vong giữa đường vào động mạch quay và động mạch đùi."
         }
       ],
       "matching": [
@@ -258,11 +394,23 @@
           "options": [
             "Excludes hemorrhage without contrast",
             "Pinpoints occlusion site and grades collaterals",
-            "Closes the femoral puncture site"
+            "Differentiates ischemic core from penumbra up to 24 hours"
           ],
           "answer": "Pinpoints occlusion site and grades collaterals",
           "evidenceParagraph": "p1",
           "explanationVi": "Đoạn 1 nêu multiphase CTA định vị vị trí tắc và đánh giá tuần hoàn bàng hệ."
+        },
+        {
+          "id": "dr_m2",
+          "prompt": "Match 'favorable target mismatch profile' to its clinical implication",
+          "options": [
+            "Excludes patients from endovascular therapy",
+            "Confirms complete reperfusion on DSA",
+            "Identifies late-window patients who still benefit up to 24 hours"
+          ],
+          "answer": "Identifies late-window patients who still benefit up to 24 hours",
+          "evidenceParagraph": "p2",
+          "explanationVi": "Đoạn 2 khẳng định hồ sơ bất tương xứng mục tiêu giúp chọn bệnh nhân vẫn hưởng lợi tái thông đến 24 giờ."
         }
       ],
       "completion": [
@@ -272,6 +420,13 @@
           "answer": "embolization",
           "evidenceParagraph": "p3",
           "explanationVi": "Đoạn 3 nêu rõ cụm từ 'minimizes distal embolization'."
+        },
+        {
+          "id": "dr_c2",
+          "prompt": "First-pass effect is defined as achieving complete or near-complete _____ (mTICI 2c–3) on the initial retrieval attempt.",
+          "answer": "reperfusion",
+          "evidenceParagraph": "p3",
+          "explanationVi": "Đoạn 3 ghi chính xác: 'achieving complete or near-complete reperfusion (mTICI 2c–3)'."
         }
       ]
     }

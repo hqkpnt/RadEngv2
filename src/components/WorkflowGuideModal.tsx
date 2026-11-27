@@ -33,11 +33,11 @@ THÔNG TIN NGỮ CẢNH:
 QUY TẮC BẮT BUỘC (TẬP TRUNG 3 KỸ NĂNG: VOCABULARY · GRAMMAR · READING):
 1. Chính xác tuyệt đối về thuật ngữ y khoa CĐHA & DSA (không bịa số liệu hoặc phác đồ ngoài tài liệu).
 2. Toàn bộ trường dịch nghĩa tiếng Việt (*Vi) phải chuẩn thuật ngữ chuyên khoa Việt Nam.
-3. Vocabulary: 6–10 thuật ngữ cốt lõi nhất của chương, bắt buộc có ipa, wordRoot (phân tích gốc Hy Lạp/Latinh), termKey (snake_case không dấu), noteVi lâm sàng, và ví dụ song ngữ Anh–Việt sát thực hành đọc phim/can thiệp.
-4. Grammar: 1–2 điểm ngữ pháp tiêu biểu trong chương.
-   - ĐẶT TÊN điểm ngữ pháp ("topic") PHẢI ngắn gọn, chuẩn tên ngữ pháp tiếng Anh (2–5 từ, ví dụ: "Passive Modal Verbs", "Past Simple Passive", "Participle Clauses", "Reduced Relative Clauses", "Concession Clauses") — KHÔNG nhồi ngữ cảnh dài dòng vào tên điểm ngữ pháp (tránh kiểu "Passive Modal Verbs for Clinical Recommendations & Protocols").
-   - Đưa ngữ cảnh CĐHA/DSA hoặc học thuật một cách tự nhiên vào phần explanationVi, sourceSentence và 3 câu quickExercises (trộn mcq + fill, mỗi câu có id riêng như "gp1_q1", "gp1_q2", "gp1_q3").
-5. Reading: 2–3 đoạn tổng hợp kiến thức trọng tâm từ chương (có bản dịch tiếng Việt từng đoạn), glossary (3–5 thuật ngữ khó) và ĐỦ 4 dạng câu hỏi: mcq, tfng (TRUE/FALSE/NOT GIVEN), matching, completion (có evidenceParagraph).
+3. Vocabulary: 8–12 thuật ngữ cốt lõi nhất của chương, bắt buộc có ipa, wordRoot (phân tích gốc Hy Lạp/Latinh), termKey (snake_case không dấu), noteVi lâm sàng, và ví dụ song ngữ Anh–Việt sát thực hành đọc phim/can thiệp.
+4. Grammar: 2 điểm ngữ pháp tiêu biểu trong chương.
+   - ĐẶT TÊN điểm ngữ pháp ("topic") PHẢI ngắn gọn, chuẩn tên ngữ pháp tiếng Anh (2–5 từ, ví dụ: "Passive Modal Verbs", "Past Simple Passive", "Participle Clauses", "Reduced Relative Clauses", "Concession Clauses") — KHÔNG nhồi ngữ cảnh dài dòng vào tên điểm ngữ pháp.
+   - Đưa ngữ cảnh CĐHA/DSA hoặc học thuật tự nhiên vào explanationVi, sourceSentence và ĐÚNG 6 câu quickExercises mỗi điểm ngữ pháp, trộn đa dạng 4 dạng: 2 câu "mcq", 1 câu "fill", 1 câu "error" (sửa lỗi kèm sourceSentence & hint) và 2 câu "rewrite" (viết lại câu kèm sourceSentence, hint và acceptedAnswers cho các cách viết tương đương).
+5. Reading: 3 đoạn tổng hợp kiến thức trọng tâm từ chương (có bản dịch tiếng Việt từng đoạn), glossary (4–6 thuật ngữ khó) và 10–12 câu hỏi chia đều ĐỦ 4 dạng: mcq (3 câu), tfng (3 câu TRUE/FALSE/NOT GIVEN), matching (2–3 câu), completion (2–3 câu), mỗi câu đều có evidenceParagraph và explanationVi.
 
 MẪU CẤU TRÚC JSON BẮT BUỘC:
 {
@@ -50,7 +50,7 @@ MẪU CẤU TRÚC JSON BẮT BUỘC:
     "subspecialty": "${promptSub}",
     "sourceBook": "${promptBook} (${promptChapter})",
     "tags": ["DSA", "CT/MRI", "Keyword3"],
-    "estimatedMinutes": 30,
+    "estimatedMinutes": 35,
     "createdAt": "${new Date().toISOString().slice(0, 10)}"
   },
   "vocabulary": [
@@ -74,9 +74,12 @@ MẪU CẤU TRÚC JSON BẮT BUỘC:
       "explanationVi": "Dùng thể bị động với động từ khuyết thiếu để nêu khuyến cáo, chỉ định hoặc nguyên tắc thực hành một cách khách quan.",
       "sourceSentence": { "en": "...", "vi": "..." },
       "quickExercises": [
-        { "id": "gp1_q1", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "A", "explanationVi": "..." },
+        { "id": "gp1_q1", "type": "mcq", "prompt": "...", "options": ["A", "B", "C", "D"], "answer": "A", "explanationVi": "..." },
         { "id": "gp1_q2", "type": "fill", "prompt": "...", "answer": "...", "explanationVi": "..." },
-        { "id": "gp1_q3", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "B", "explanationVi": "..." }
+        { "id": "gp1_q3", "type": "mcq", "prompt": "...", "options": ["A", "B", "C"], "answer": "B", "explanationVi": "..." },
+        { "id": "gp1_q4", "type": "error", "prompt": "Sửa lỗi ngữ pháp trong câu sau:", "sourceSentence": "...", "hint": "...", "answer": "...", "explanationVi": "..." },
+        { "id": "gp1_q5", "type": "rewrite", "prompt": "Viết lại câu sau dùng cấu trúc gợi ý:", "sourceSentence": "...", "hint": "Bắt đầu bằng: ...", "answer": "...", "acceptedAnswers": ["..."], "explanationVi": "..." },
+        { "id": "gp1_q6", "type": "rewrite", "prompt": "Viết lại câu sau:", "sourceSentence": "...", "hint": "...", "answer": "...", "acceptedAnswers": ["..."], "explanationVi": "..." }
       ]
     }
   ],
@@ -91,8 +94,8 @@ MẪU CẤU TRÚC JSON BẮT BUỘC:
     "questions": {
       "mcq": [{ "id": "r_mcq1", "question": "...", "options": ["A", "B", "C", "D"], "answer": "A", "evidenceParagraph": "p1", "explanationVi": "..." }],
       "tfng": [{ "id": "r_tf1", "statement": "...", "answer": "TRUE", "evidenceParagraph": "p1", "explanationVi": "..." }],
-      "matching": [{ "id": "r_m1", "prompt": "...", "options": ["A", "B", "C"], "answer": "A", "evidenceParagraph": "p1" }],
-      "completion": [{ "id": "r_c1", "prompt": "... _____ ...", "answer": "word", "evidenceParagraph": "p1" }]
+      "matching": [{ "id": "r_m1", "prompt": "...", "options": ["A", "B", "C"], "answer": "A", "evidenceParagraph": "p1", "explanationVi": "..." }],
+      "completion": [{ "id": "r_c1", "prompt": "... _____ ...", "answer": "word", "evidenceParagraph": "p1", "explanationVi": "..." }]
     }
   }
 }`;

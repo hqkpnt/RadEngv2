@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Award,
   CheckCircle2,
+  ChevronDown,
   Clock,
   FileJson,
   Layers,
@@ -63,6 +64,8 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
   } = useApp();
 
   const [mode, setMode] = useState<'list' | 'flashcard' | 'drill'>('list');
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({});
+  const [expandAllDetails, setExpandAllDetails] = useState(false);
 
   // Manual add card modal state (Single + Bulk JSON)
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -363,6 +366,24 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
         </div>
 
         <div className="flex-row flex-wrap">
+          {mode === 'list' && items.length > 0 && (
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                setExpandAllDetails((prev) => !prev);
+                setExpandedCards({});
+              }}
+            >
+              <ChevronDown
+                size={14}
+                style={{
+                  transform: expandAllDetails ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.18s ease-out',
+                }}
+              />
+              {expandAllDetails ? 'Thu gọn ghi chú' : 'Mở rộng ghi chú'}
+            </button>
+          )}
           <button className="btn btn-sm btn-primary" onClick={() => setAddModalOpen(true)}>
             <Plus size={15} /> Thêm thẻ thủ công
           </button>
@@ -389,61 +410,117 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
         </div>
       ) : (
         <>
-          {/* Mode 1: Detailed RadEng Vocabulary Cards */}
+          {/* Mode 1: Detailed RadEng Vocabulary Cards (Airy + Progressive Disclosure) */}
           {mode === 'list' && (
             <div className="grid-2">
               {items.map((item) => {
                 const isMastered = Boolean(state.masteredBank[item.termKey]);
+                const hasDetails = Boolean(item.wordRoot || item.noteVi || item.exampleVi);
+                const isDetailsOpen = expandAllDetails || Boolean(expandedCards[item.termKey]);
                 return (
-                  <motion.div
-                    key={item.termKey}
-                    layout
-                    className="card stack-sm"
-                  >
+                  <div key={item.termKey} className="card stack-sm">
                     <div className="flex-between flex-wrap">
                       <div>
-                        <strong style={{ fontSize: '1.12rem', color: 'var(--accent)' }}>{item.term}</strong>
+                        <strong style={{ fontSize: '1.14rem', color: 'var(--accent)' }}>
+                          {item.term}
+                        </strong>
                         {item.ipa && (
-                          <span className="mono" style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginLeft: 8 }}>
+                          <span
+                            className="mono"
+                            style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginLeft: 8 }}
+                          >
                             {item.ipa}
                           </span>
                         )}
                       </div>
-                      <div className="flex-row" style={{ gap: 5 }}>
+                      <div className="flex-row" style={{ gap: 6 }}>
                         {item.isCustom && <span className="badge badge-warning">Tự thêm</span>}
                         <span className="badge">{item.pos}</span>
-                        <span className="badge mono" style={{ fontSize: '0.7rem' }}>
-                          {item.termKey}
-                        </span>
                       </div>
                     </div>
 
-                    <div style={{ fontWeight: 600, fontSize: '0.98rem' }}>{item.meaningVi}</div>
-
-                    {item.wordRoot && (
-                      <div className="card-subtle" style={{ padding: '8px 10px', fontSize: '0.83rem' }}>
-                        <strong>Gốc từ (wordRoot):</strong> {item.wordRoot}
-                      </div>
-                    )}
-
-                    {item.noteVi && (
-                      <div style={{ fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-                        💡 {item.noteVi}
-                      </div>
-                    )}
+                    <div style={{ fontWeight: 600, fontSize: '1rem', lineHeight: 1.5 }}>
+                      {item.meaningVi}
+                    </div>
 
                     {item.exampleEn && (
-                      <div style={{ borderLeft: '3px solid var(--accent-border)', paddingLeft: 10 }}>
-                        <div style={{ fontSize: '0.9rem' }}>{item.exampleEn}</div>
-                        {item.exampleVi && (
-                          <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: 2 }}>
-                            {item.exampleVi}
-                          </div>
-                        )}
+                      <p
+                        className="prose-explanation"
+                        style={{
+                          margin: 0,
+                          borderLeft: '3px solid var(--accent-border)',
+                          paddingLeft: 12,
+                          fontSize: '0.92rem',
+                          color: 'var(--text-secondary)',
+                        }}
+                      >
+                        {item.exampleEn}
+                      </p>
+                    )}
+
+                    {hasDetails && (
+                      <div>
+                        <button
+                          type="button"
+                          className="disclosure-trigger"
+                          aria-expanded={isDetailsOpen}
+                          onClick={() =>
+                            setExpandedCards((prev) => ({
+                              ...prev,
+                              [item.termKey]: !isDetailsOpen,
+                            }))
+                          }
+                        >
+                          <ChevronDown
+                            size={14}
+                            style={{
+                              transform: isDetailsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.18s ease-out',
+                            }}
+                          />
+                          <span>
+                            {isDetailsOpen ? 'Ẩn gốc từ & ghi chú' : 'Gốc từ, lưu ý lâm sàng & dịch ví dụ'}
+                          </span>
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                          {isDetailsOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -4 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -4 }}
+                              transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                              className="soft-tint stack-sm"
+                              style={{ marginTop: 8, fontSize: '0.85rem' }}
+                            >
+                              {item.wordRoot && (
+                                <div className="prose-explanation">
+                                  <strong>Gốc từ:</strong> {item.wordRoot}
+                                </div>
+                              )}
+                              {item.noteVi && (
+                                <div
+                                  className="prose-explanation"
+                                  style={{ color: 'var(--text-secondary)' }}
+                                >
+                                  <strong>Lưu ý lâm sàng:</strong> {item.noteVi}
+                                </div>
+                              )}
+                              {item.exampleVi && (
+                                <div
+                                  className="prose-explanation"
+                                  style={{ color: 'var(--text-muted)' }}
+                                >
+                                  <strong>Dịch ví dụ:</strong> {item.exampleVi}
+                                </div>
+                              )}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
 
-                    <div className="flex-row flex-wrap" style={{ marginTop: 4 }}>
+                    <div className="flex-row flex-wrap" style={{ marginTop: 6 }}>
                       <button
                         className="btn btn-sm btn-soft"
                         onClick={() =>
@@ -486,7 +563,7 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
                         </button>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -532,9 +609,9 @@ export const VocabularyTab: React.FC<VocabularyTabProps> = ({ lesson, timedMode 
 
               <motion.div
                 key={`${currentCard.termKey}-${flipped}`}
-                initial={{ opacity: 0.65, rotateX: flipped ? -8 : 8, scale: 0.98 }}
-                animate={{ opacity: 1, rotateX: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+                initial={{ opacity: 0.5, y: flipped ? -6 : 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                 className={`flashcard-stage ${zoomed ? 'zoomed' : ''}`}
                 onClick={() => setFlipped((f) => !f)}
                 role="button"

@@ -16,36 +16,6 @@ export function sanitizePlainText(input: unknown, maxLength = 20000): string {
 }
 
 /**
- * Strict URL allowlist for audio/media fields to block javascript:, data:text/html, vbscript:.
- */
-export function sanitizeMediaUrl(url: unknown): string | undefined {
-  if (typeof url !== 'string') return undefined;
-  const trimmed = url.trim().replace(CONTROL_CHARS_RE, '');
-  if (!trimmed) return undefined;
-
-  // Reject dangerous schemes explicitly
-  const lower = trimmed.toLowerCase().replace(/\s+/g, '');
-  if (
-    lower.startsWith('javascript:') ||
-    lower.startsWith('vbscript:') ||
-    lower.startsWith('data:')
-  ) {
-    return undefined;
-  }
-
-  // Allow relative paths, blob:, http:, https:
-  if (
-    trimmed.startsWith('./') ||
-    trimmed.startsWith('/') ||
-    trimmed.startsWith('blob:') ||
-    /^https?:\/\//i.test(trimmed)
-  ) {
-    return trimmed;
-  }
-  return undefined;
-}
-
-/**
  * Strict HTTPS validation for Google Apps Script Web App sync URLs.
  * Rejects javascript:, data:, http:, and malformed URLs.
  */
